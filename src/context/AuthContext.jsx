@@ -37,21 +37,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, password) => {
-        const normalizedEmail = email.trim().toLowerCase();
-
-        // Check if exists using server filter
-        const existingUser = await db.getByEmail(normalizedEmail);
-        if (existingUser) {
-            return false; // Already exists
-        }
-
-        const newUser = {
-            name: name.trim(),
-            email: normalizedEmail,
-            password: password.trim(), // In a real app, hash this!
-            role: null // Force onboarding
-        };
         try {
+            const normalizedEmail = email.trim().toLowerCase();
+
+            // Check if exists using server filter
+            const existingUser = await db.getByEmail(normalizedEmail);
+            if (existingUser) {
+                return { success: false, error: 'Email já cadastrado.' };
+            }
+
+            const newUser = {
+                name: name.trim(),
+                email: normalizedEmail,
+                password: password.trim(), // In a real app, hash this!
+                role: null // Force onboarding
+            };
+
             const createdUser = await db.add('users', newUser);
 
             if (createdUser && createdUser.id) {
@@ -105,12 +106,19 @@ export const AuthProvider = ({ children }) => {
     };
 
     const updateProfile = async (updates) => {
-        if (user) {
-            const updatedUser = await db.update('users', user.id, updates);
-            if (updatedUser) {
-                setUser(updatedUser);
-                localStorage.setItem('qua_user_session', JSON.stringify(updatedUser));
+        try {
+            if (user) {
+                const updatedUser = await db.update('users', user.id, updates);
+                if (updatedUser) {
+                    setUser(updatedUser);
+                    localStorage.setItem('qua_user_session', JSON.stringify(updatedUser));
+                    return { success: true };
+                }
             }
+            return { success: false, error: "Usuário não logado ou falha na atualização." };
+        } catch (e) {
+            console.error("Update Profile Error:", e);
+            return { success: false, error: e.message };
         }
     };
 
