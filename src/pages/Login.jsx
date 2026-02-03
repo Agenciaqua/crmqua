@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -14,7 +14,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const [dbStatus, setDbStatus] = useState({ ok: true, message: '' });
 
-    useEffect(() => {
+    React.useEffect(() => {
         // Verify database connection on load
         db.healthCheck().then(status => {
             if (!status.ok) {
