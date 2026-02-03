@@ -22,6 +22,16 @@ export default async (req, context) => {
 
     const sql = neon(process.env.DATABASE_URL);
     const url = new URL(req.url);
+    const health = url.searchParams.get('health');
+    if (health) {
+        try {
+            await sql`SELECT 1`;
+            return new Response(JSON.stringify({ status: 'ok' }), { headers: { ...headers, 'Content-Type': 'application/json' } });
+        } catch (e) {
+            return new Response(JSON.stringify({ status: 'error', message: e.message }), { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } });
+        }
+    }
+
     const type = url.searchParams.get('type'); // table name
     const id = url.searchParams.get('id');
 

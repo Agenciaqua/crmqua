@@ -1,6 +1,18 @@
 const API_URL = '/.netlify/functions/db';
 
 export const db = {
+    healthCheck: async () => {
+        try {
+            const res = await fetch(`${API_URL}?health=true`);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: res.statusText }));
+                return { ok: false, message: err.error || err.message || `HTTP ${res.status}` };
+            }
+            return { ok: true };
+        } catch (e) {
+            return { ok: false, message: e.message };
+        }
+    },
     getAll: async (table) => {
         try {
             const res = await fetch(`${API_URL}?type=${table}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });

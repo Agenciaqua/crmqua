@@ -12,6 +12,16 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [dbStatus, setDbStatus] = useState({ ok: true, message: '' });
+
+    useEffect(() => {
+        // Verify database connection on load
+        db.healthCheck().then(status => {
+            if (!status.ok) {
+                setDbStatus(status);
+            }
+        });
+    }, []);
 
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -104,6 +114,18 @@ export default function Login() {
                     color: '#FFF',
                     letterSpacing: '1px'
                 }}>{isSigningUp ? 'Criar Conta' : 'Acesso ao Sistema'}</h2>
+
+                {!dbStatus.ok && (
+                    <div style={{
+                        background: '#ff4444', color: 'white', padding: '15px', borderRadius: '8px',
+                        marginBottom: '20px', fontSize: '0.9rem', width: '100%', textAlign: 'center'
+                    }}>
+                        <strong>ERRO DE CONEXÃO:</strong><br />
+                        {dbStatus.message === "Configuration Error: DATABASE_URL missing"
+                            ? "A Variável DATABASE_URL não foi configurada no Netlify."
+                            : dbStatus.message}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
 
