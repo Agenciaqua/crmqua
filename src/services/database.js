@@ -3,7 +3,7 @@ const API_URL = '/.netlify/functions/db';
 export const db = {
     getAll: async (table) => {
         try {
-            const res = await fetch(`${API_URL}?type=${table}`);
+            const res = await fetch(`${API_URL}?type=${table}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
             if (!res.ok) {
                 console.error(`Fetch error ${table}:`, res.statusText);
                 return [];
@@ -16,7 +16,7 @@ export const db = {
     },
     getById: async (table, id) => {
         try {
-            const res = await fetch(`${API_URL}?type=${table}&id=${id}`);
+            const res = await fetch(`${API_URL}?type=${table}&id=${id}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
             if (!res.ok) return null;
             return await res.json();
         } catch (e) {
