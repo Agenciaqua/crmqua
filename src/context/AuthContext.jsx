@@ -37,9 +37,9 @@ export const AuthProvider = ({ children }) => {
         const newUser = {
             name,
             email,
+
             password, // In a real app, hash this!
-            role: null, // Force onboarding
-            createdAt: new Date().toLocaleDateString('pt-BR')
+            role: null // Force onboarding
         };
         await db.add('users', newUser);
 
@@ -63,8 +63,8 @@ export const AuthProvider = ({ children }) => {
                     name: userInfo.name,
                     email: userInfo.email,
                     role: null, // Force onboarding
-                    avatar: userInfo.picture,
-                    createdAt: new Date().toLocaleDateString('pt-BR')
+
+                    avatar: userInfo.picture
                 };
                 // Add directly to DB
                 await db.add('users', newUser);
