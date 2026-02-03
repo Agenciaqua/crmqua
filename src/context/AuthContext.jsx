@@ -46,14 +46,14 @@ export const AuthProvider = ({ children }) => {
             password, // In a real app, hash this!
             role: null // Force onboarding
         };
-        await db.add('users', newUser);
+        const createdUser = await db.add('users', newUser);
 
-        // Login immediately
-        const updatedUsers = await db.getAll('users');
-        const user = updatedUsers.find(u => u.email === email);
-        setUser(user);
-        localStorage.setItem('qua_user_session', JSON.stringify(user));
-        return true;
+        if (createdUser && createdUser.id) {
+            setUser(createdUser);
+            localStorage.setItem('qua_user_session', JSON.stringify(createdUser));
+            return true;
+        }
+        return false;
     };
 
     const loginWithGoogle = async (userInfo) => {
@@ -72,10 +72,10 @@ export const AuthProvider = ({ children }) => {
                     avatar: userInfo.picture
                 };
                 // Add directly to DB
-                await db.add('users', newUser);
-                // Fetch again to get ID
-                const updatedUsers = await db.getAll('users');
-                userFound = updatedUsers.find(u => u.email === userInfo.email);
+                const createdUser = await db.add('users', newUser);
+                if (createdUser && createdUser.id) {
+                    userFound = createdUser;
+                }
             }
 
             if (userFound) {
