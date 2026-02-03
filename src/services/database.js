@@ -46,7 +46,7 @@ export const db = {
             return (users && users.length > 0) ? users[0] : null;
         } catch (e) {
             console.error("GetByEmail Error:", e);
-            return null;
+            throw e;
         }
     },
     add: async (table, item) => {
@@ -56,11 +56,14 @@ export const db = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(item)
             });
-            if (!res.ok) throw new Error("Add failed");
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: res.statusText }));
+                throw new Error(err.error || err.message || "Add failed");
+            }
             return await res.json();
         } catch (e) {
             console.error("DB Add Error:", e);
-            return null;
+            throw e;
         }
     },
     update: async (table, id, updates) => {
@@ -95,7 +98,7 @@ export const db = {
             return null;
         } catch (e) {
             console.error("Auth Error:", e);
-            return null;
+            throw e;
         }
     }
 };

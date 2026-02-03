@@ -30,8 +30,11 @@ export default function Login() {
                     headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
                 const userData = await res.json();
-                if (await loginWithGoogle(userData)) {
+                const result = await loginWithGoogle(userData);
+                if (result.success) {
                     navigate('/dashboard');
+                } else {
+                    setError(result.error || 'Falha no login com Google.');
                 }
             } catch (err) {
                 console.error(err);
@@ -50,22 +53,19 @@ export default function Login() {
                 setError('Preencha todos os campos.');
                 return;
             }
-            if (await register(name, email, password)) {
-                // Register logs in automatically
+
+            const result = await register(name, email, password);
+            if (result.success) {
                 navigate('/onboarding');
             } else {
-                setError('Email já cadastrado.');
+                setError(result.error || 'Erro ao criar conta.');
             }
         } else {
-            if (await login(email, password)) {
-                // Check if user has role, if not -> onboarding
-                // But login function in AuthContext doesn't return user obj directly to check here
-                // We will handle redirect logic in App.jsx or AuthContext mostly
-                // For now assuming existing users go to dashboard
-                // We will fix redirect logic next step
+            const result = await login(email, password);
+            if (result.success) {
                 navigate('/dashboard');
             } else {
-                setError('Email ou senha inválidos.');
+                setError(result.error || 'Email ou senha inválidos.');
             }
         }
     };

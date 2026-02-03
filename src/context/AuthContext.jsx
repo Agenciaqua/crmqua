@@ -23,13 +23,17 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const userFound = await db.authenticate(email.trim().toLowerCase(), password.trim());
-        if (userFound) {
-            setUser(userFound);
-            localStorage.setItem('qua_user_session', JSON.stringify(userFound));
-            return true;
+        try {
+            const userFound = await db.authenticate(email.trim().toLowerCase(), password.trim());
+            if (userFound) {
+                setUser(userFound);
+                localStorage.setItem('qua_user_session', JSON.stringify(userFound));
+                return { success: true };
+            }
+            return { success: false, error: 'Email ou senha incorretos.' };
+        } catch (e) {
+            return { success: false, error: e.message || "Erro desconhecido no login." };
         }
-        return false;
     };
 
     const register = async (name, email, password) => {
@@ -47,14 +51,18 @@ export const AuthProvider = ({ children }) => {
             password: password.trim(), // In a real app, hash this!
             role: null // Force onboarding
         };
-        const createdUser = await db.add('users', newUser);
+        try {
+            const createdUser = await db.add('users', newUser);
 
-        if (createdUser && createdUser.id) {
-            setUser(createdUser);
-            localStorage.setItem('qua_user_session', JSON.stringify(createdUser));
-            return true;
+            if (createdUser && createdUser.id) {
+                setUser(createdUser);
+                localStorage.setItem('qua_user_session', JSON.stringify(createdUser));
+                return { success: true };
+            }
+            return { success: false, error: "Falha ao criar usuário (sem ID retornado)." };
+        } catch (e) {
+            return { success: false, error: e.message };
         }
-        return false;
     };
 
     const loginWithGoogle = async (userInfo) => {
@@ -82,12 +90,12 @@ export const AuthProvider = ({ children }) => {
             if (userFound) {
                 setUser(userFound);
                 localStorage.setItem('qua_user_session', JSON.stringify(userFound));
-                return true;
+                return { success: true };
             }
-            return false;
+            return { success: false, error: "Não foi possível autenticar com o Google." };
         } catch (error) {
             console.error("Google Login Error:", error);
-            return false;
+            return { success: false, error: error.message };
         }
     };
 
