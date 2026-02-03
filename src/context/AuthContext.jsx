@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const userFound = await db.authenticate(email, password);
+        const userFound = await db.authenticate(email.trim(), password.trim());
         if (userFound) {
             setUser(userFound);
             localStorage.setItem('qua_user_session', JSON.stringify(userFound));
@@ -40,10 +40,9 @@ export const AuthProvider = ({ children }) => {
         }
 
         const newUser = {
-            name,
-            email,
-
-            password, // In a real app, hash this!
+            name: name.trim(),
+            email: email.trim(),
+            password: password.trim(), // In a real app, hash this!
             role: null // Force onboarding
         };
         const createdUser = await db.add('users', newUser);
