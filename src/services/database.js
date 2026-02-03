@@ -23,6 +23,20 @@ export const db = {
             return null;
         }
     },
+    getByEmail: async (email) => {
+        try {
+            const res = await fetch(`${API_URL}?type=users&email=${encodeURIComponent(email)}`, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            if (!res.ok) return null;
+            const users = await res.json();
+            return (users && users.length > 0) ? users[0] : null;
+        } catch (e) {
+            console.error("GetByEmail Error:", e);
+            return null;
+        }
+    },
     add: async (table, item) => {
         try {
             const res = await fetch(`${API_URL}?type=${table}`, {
@@ -62,21 +76,9 @@ export const db = {
     },
     authenticate: async (email, password) => {
         try {
-            // Filter by email on server side for better performance and reliability
-            const res = await fetch(`${API_URL}?type=users&email=${encodeURIComponent(email)}`, {
-                cache: 'no-store',
-                headers: { 'Cache-Control': 'no-cache' }
-            });
-
-            if (!res.ok) return null;
-
-            const users = await res.json();
-            if (users && users.length > 0) {
-                const user = users[0];
-                // Direct password comparison (in real app, use bcrypt)
-                if (user.password === password) {
-                    return user;
-                }
+            const user = await db.getByEmail(email);
+            if (user && user.password === password) {
+                return user;
             }
             return null;
         } catch (e) {

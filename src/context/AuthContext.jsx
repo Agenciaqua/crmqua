@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const userFound = await db.authenticate(email.trim(), password.trim());
+        const userFound = await db.authenticate(email.trim().toLowerCase(), password.trim());
         if (userFound) {
             setUser(userFound);
             localStorage.setItem('qua_user_session', JSON.stringify(userFound));
@@ -33,15 +33,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, password) => {
-        // Check if exists
-        const allUsers = await db.getAll('users');
-        if (allUsers.find(u => u.email === email)) {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check if exists using server filter
+        const existingUser = await db.getByEmail(normalizedEmail);
+        if (existingUser) {
             return false; // Already exists
         }
 
         const newUser = {
             name: name.trim(),
-            email: email.trim(),
+            email: normalizedEmail,
             password: password.trim(), // In a real app, hash this!
             role: null // Force onboarding
         };
@@ -57,17 +59,17 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithGoogle = async (userInfo) => {
         try {
-            // Check if user exists by email
-            const allUsers = await db.getAll('users');
-            let userFound = allUsers.find(u => u.email === userInfo.email);
+            const normalizedEmail = userInfo.email.trim().toLowerCase();
+
+            // Check if user exists by email using server filter
+            let userFound = await db.getByEmail(normalizedEmail);
 
             if (!userFound) {
                 // Register new user automatically
                 const newUser = {
                     name: userInfo.name,
-                    email: userInfo.email,
+                    email: normalizedEmail,
                     role: null, // Force onboarding
-
                     avatar: userInfo.picture
                 };
                 // Add directly to DB
