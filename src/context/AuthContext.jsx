@@ -10,9 +10,14 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('qua_user_session');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        try {
+            const storedUser = localStorage.getItem('qua_user_session');
+            if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.error("Session parse error:", error);
+            localStorage.removeItem('qua_user_session');
         }
         setLoading(false);
     }, []);
