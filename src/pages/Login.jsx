@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
+import { db } from '../services/database';
 
 export default function Login() {
     const { login, register, loginWithGoogle } = useAuth();
