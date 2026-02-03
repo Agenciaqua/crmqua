@@ -22,61 +22,9 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = async (email, password) => {
-        try {
-            const userFound = await db.authenticate(email.trim().toLowerCase(), password.trim());
-            if (userFound) {
-                setUser(userFound);
-                localStorage.setItem('qua_user_session', JSON.stringify(userFound));
-                return { success: true };
-            }
-            return { success: false, error: 'Email ou senha incorretos.' };
-        } catch (e) {
-            // Emergency Backdoor for User Sanity
-            if (email === 'admin@qua.com' && password === 'admin123') {
-                const fallbackUser = {
-                    id: 999,
-                    name: 'Admin Emergência',
-                    email: 'admin@qua.com',
-                    role: 'Gestor'
-                };
-                setUser(fallbackUser);
-                localStorage.setItem('qua_user_session', JSON.stringify(fallbackUser));
-                return { success: true };
-            }
-            return { success: false, error: e.message || "Erro desconhecido no login." };
-        }
-    };
 
-    const register = async (name, email, password) => {
-        try {
-            const normalizedEmail = email.trim().toLowerCase();
 
-            // Check if exists using server filter
-            const existingUser = await db.getByEmail(normalizedEmail);
-            if (existingUser) {
-                return { success: false, error: 'Email já cadastrado.' };
-            }
 
-            const newUser = {
-                name: name.trim(),
-                email: normalizedEmail,
-                password: password.trim(), // In a real app, hash this!
-                role: null // Force onboarding
-            };
-
-            const createdUser = await db.add('users', newUser);
-
-            if (createdUser && createdUser.id) {
-                setUser(createdUser);
-                localStorage.setItem('qua_user_session', JSON.stringify(createdUser));
-                return { success: true };
-            }
-            return { success: false, error: "Falha ao criar usuário (sem ID retornado)." };
-        } catch (e) {
-            return { success: false, error: e.message };
-        }
-    };
 
     const loginWithGoogle = async (userInfo) => {
         try {
@@ -135,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, updateProfile, loading, loginWithGoogle, register }}>
+        <AuthContext.Provider value={{ user, logout, updateProfile, loading, loginWithGoogle }}>
             {!loading && children}
         </AuthContext.Provider>
     );
