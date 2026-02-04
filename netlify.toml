@@ -11,4 +11,4 @@
   targetPort = 5173
 
 [environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "20" # Force Node 20 LTS
