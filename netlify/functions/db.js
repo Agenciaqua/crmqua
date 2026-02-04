@@ -10,50 +10,59 @@ export const handler = async (event, context) => {
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
     };
 
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 204, headers, body: '' };
-    }
+    try {
+        if (event.httpMethod === 'OPTIONS') {
+            return { statusCode: 204, headers, body: '' };
+        }
 
-    if (!process.env.DATABASE_URL) {
-        return {
-            statusCode: 500,
-            headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: "Configuration Error: DATABASE_URL missing" })
-        };
-    }
-
-    const sql = neon(process.env.DATABASE_URL);
-
-    // Parse Query Parameters
-    const query = event.queryStringParameters || {};
-    const health = query.health;
-
-    if (health) {
-        try {
-            await sql`SELECT 1`;
-            return {
+        // Diagnostic Ping (No DB required)
+        if (event.queryStringParameters && event.queryStringParameters.ping) {
+             return {
                 statusCode: 200,
                 headers: { ...headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'ok' })
+                body: JSON.stringify({ status: 'pong', message: 'Function is running!' })
             };
-        } catch (e) {
+        }
+
+        if (!process.env.DATABASE_URL) {
+            console.error("Missing DATABASE_URL");
             return {
                 statusCode: 500,
                 headers: { ...headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'error', message: e.message })
+                body: JSON.stringify({ error: "Configuration Error: DATABASE_URL missing" })
             };
         }
-    }
 
-    const type = query.type; // table name
-    const id = query.id;
+        const sql = neon(process.env.DATABASE_URL);
 
-    try {
+        // Parse Query Parameters
+        const query = event.queryStringParameters || {};
+        const health = query.health;
+
+        if (health) {
+            try {
+                await sql`SELECT 1`;
+                return {
+                    statusCode: 200,
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'ok' })
+                };
+            } catch (e) {
+                console.error("Health Check Failed:", e);
+                return {
+                    statusCode: 500,
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'error', message: e.message })
+                };
+            }
+        }
+
+        const type = query.type; // table name
+        const id = query.id;
+
         // Basic security check: only allow known tables
         const allowedTables = ['users', 'clients', 'tasks', 'meetings', 'files'];
         if (!type || !allowedTables.includes(type)) {
-            // Only throw if trying to access a table, not for health check (already handled)
-            // But if we are here, health check didn't match
             throw new Error(`Invalid table type: ${type}`);
         }
 
@@ -153,11 +162,12 @@ export const handler = async (event, context) => {
         };
 
     } catch (error) {
-        console.error("Database Error:", error);
+        console.error("Global Handler Error:", error);
         return {
             statusCode: 500,
             headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: error.message })
+            // Return the actual error message to the frontend so we can see it!
+            body: JSON.stringify({ error: `Function Crash: ${error.message}`, stack: error.stack })
         };
     }
 };
