@@ -80,7 +80,7 @@ export const handler = async (event, context) => {
             case 'GET':
                 if (id) {
                     // Get one
-                    result = await sql(`SELECT * FROM ${type} WHERE id = $1`, [id]);
+                    result = await sql.query(`SELECT * FROM ${type} WHERE id = $1`, [id]);
                     return {
                         statusCode: 200,
                         headers: { ...headers, 'Content-Type': 'application/json' },
@@ -100,9 +100,9 @@ export const handler = async (event, context) => {
                     });
 
                     if (keys.length > 0) {
-                        result = await sql(`SELECT * FROM ${type} WHERE ${keys.join(' AND ')} ORDER BY created_at DESC`, values);
+                        result = await sql.query(`SELECT * FROM ${type} WHERE ${keys.join(' AND ')} ORDER BY created_at DESC`, values);
                     } else {
-                        result = await sql(`SELECT * FROM ${type} ORDER BY created_at DESC`);
+                        result = await sql.query(`SELECT * FROM ${type} ORDER BY created_at DESC`);
                     }
                 }
                 break;
@@ -116,7 +116,7 @@ export const handler = async (event, context) => {
 
                 if (columns.length === 0) throw new Error("No data to insert");
 
-                result = await sql(`
+                result = await sql.query(`
           INSERT INTO ${type} (${columns.join(', ')}) 
           VALUES (${placeholders}) 
           RETURNING *
@@ -137,7 +137,7 @@ export const handler = async (event, context) => {
 
                 const setClause = putColumns.map((col, i) => `${col} = $${i + 1}`).join(', ');
 
-                result = await sql(`
+                result = await sql.query(`
           UPDATE ${type} 
           SET ${setClause} 
           WHERE id = $${putValues.length + 1}
@@ -152,7 +152,7 @@ export const handler = async (event, context) => {
 
             case 'DELETE':
                 if (!id) throw new Error("ID required for delete");
-                await sql(`DELETE FROM ${type} WHERE id = $1`, [id]);
+                await sql.query(`DELETE FROM ${type} WHERE id = $1`, [id]);
                 return {
                     statusCode: 200,
                     headers: { ...headers, 'Content-Type': 'application/json' },
