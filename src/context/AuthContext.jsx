@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
                 const newUser = {
                     name: userInfo.name,
                     email: normalizedEmail,
+                    password: 'GOOGLE_OAUTH_USER', // Placeholder to satisfy DB NOT NULL constraint
                     role: null, // Force onboarding
                     avatar: userInfo.picture
                 };
