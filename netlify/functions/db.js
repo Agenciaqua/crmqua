@@ -3,6 +3,7 @@ import { neon } from '@neondatabase/serverless';
 
 
 export const handler = async (event, context) => {
+    console.log("Function Updated: " + new Date().toISOString());
     // CORS headers for development
     const headers = {
         'Access-Control-Allow-Origin': '*',
