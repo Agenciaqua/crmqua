@@ -17,7 +17,7 @@ export const handler = async (event, context) => {
 
         // Diagnostic Ping (No DB required)
         if (event.queryStringParameters && event.queryStringParameters.ping) {
-             return {
+            return {
                 statusCode: 200,
                 headers: { ...headers, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'pong', message: 'Function is running!' })
@@ -33,7 +33,15 @@ export const handler = async (event, context) => {
             };
         }
 
-        const sql = neon(process.env.DATABASE_URL);
+        // SMART FIX: Clean connection string if user copied the full "psql" command
+        let connectionString = process.env.DATABASE_URL;
+        if (connectionString.startsWith("psql")) {
+            // Remove "psql '" prefix and trailing "'"
+            connectionString = connectionString.replace(/^psql\s+'/, '').replace(/'$/, '');
+            console.log("Sanitized DATABASE_URL: Removed 'psql' command wrapper.");
+        }
+
+        const sql = neon(connectionString);
 
         // Parse Query Parameters
         const query = event.queryStringParameters || {};
