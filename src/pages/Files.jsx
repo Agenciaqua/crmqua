@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { Upload, FileText, Download, Trash2, Image, File, Search, Eye, X } from 'lucide-react';
 import { db } from '../services/database';
-import { storage } from '../services/storage';
+// import { storage } from '../services/storage'; // Deprecated
+import { driveService } from '../services/drive';
 import { useAuth } from '../context/AuthContext';
 import UploadFileModal from '../components/UploadFileModal';
 
@@ -13,9 +14,12 @@ const FileViewer = ({ fileKey, fileName, fileType, onClose }) => {
 
     useEffect(() => {
         const fetchFile = async () => {
-            const blob = await storage.getFile(fileKey);
-            if (blob) {
-                setBlobUrl(URL.createObjectURL(blob));
+            const token = localStorage.getItem('qua_google_token');
+            if (token) {
+                const blob = await driveService.getFile(fileKey, token);
+                if (blob) {
+                    setBlobUrl(URL.createObjectURL(blob));
+                }
             }
             setLoading(false);
         };
@@ -75,7 +79,28 @@ export default function Files() {
     };
 
     const handleFileUpload = async (newFile) => {
-        await db.add('files', { ...newFile, ownerId: user.id });
+        const token = localStorage.getItem('qua_google_token');
+        let driveFileId = null;
+
+        if (token && newFile.file) {
+            try {
+                // Upload to Google Drive
+                const driveData = await driveService.uploadFile(newFile.file, token);
+                driveFileId = driveData.id;
+            } catch (error) {
+                console.error("Erro no upload pro Drive:", error);
+                alert("Erro ao salvar no Google Drive. O arquivo será salvo apenas no banco (sem conteúdo).");
+            }
+        } else {
+            alert("Atenção: Você não está autenticado com permissão de Drive ou nenhum arquivo foi selecionado.");
+        }
+
+        // Save metadata to Database
+        await db.add('files', {
+            ...newFile,
+            storageKey: driveFileId, // Now stores Drive ID instead of local key
+            ownerId: user.id
+        });
         refreshFiles();
     };
 
@@ -93,23 +118,28 @@ export default function Files() {
 
     const handleDelete = async (file) => {
         if (window.confirm(`Deseja deletar "${file.name}" permanentemente?`)) {
-            if (file.storageKey) await storage.deleteFile(file.storageKey);
+            // Logic to delete from Drive could be added here if needed
             await db.delete('files', file.id);
             refreshFiles();
         }
     };
 
     const handleDownload = async (file) => {
-        const blob = await storage.getFile(file.storageKey);
-        if (blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            a.click();
-            URL.revokeObjectURL(url);
+        const token = localStorage.getItem('qua_google_token');
+        if (file.storageKey && token) {
+            const blob = await driveService.getFile(file.storageKey, token);
+            if (blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+            } else {
+                alert("Erro ao baixar arquivo do Drive.");
+            }
         } else {
-            alert("Arquivo não encontrado!");
+            alert("Arquivo sem vínculo com o Drive ou você precisa relogar para ter acesso.");
         }
     };
 

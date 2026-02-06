@@ -1,21 +1,50 @@
 const API_URL = '/.netlify/functions/db';
 
-export const db = {
-    healthCheck: async () => {
-        try {
-            const res = await fetch(`${API_URL}?health=true`);
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ error: res.statusText }));
-                return { ok: false, message: err.error || err.message || `HTTP ${res.status}` };
+// Schema definitions to prevent "Column does not exist" errors
+const SCHEMAS = {
+    clients: [
+        'name', 'contact', 'email', 'phone', 'status', 'category',
+        'lastInteraction', 'instagram', 'ownerId', 'role', 'relationship',
+        'businessType', 'hasTraffic', 'website', 'prospectingDay', 'notes'
+    ],
+    tasks: [
+        'title', 'assigneeId', 'status', 'priority', 'dueDate',
+        'description', 'type'
+    ],
+    users: [
+        'name', 'email', 'password', 'role', 'avatar'
+    ],
+    meetings: [
+        'title', 'clientId', 'date', 'time', 'duration', 'type',
+        'notes', 'status', 'ownerId'
+    ],
+    files: [
+        'name', 'type', 'size', 'date', 'ownerId', 'recipientId',
+        'category', 'notes', 'storageKey'
+    ]
+};
+
+const sanitize = (table, data) => {
+    if (!SCHEMAS[table]) return data; // No schema, pass through (dangerous but flexible)
+
+    const validData = {};
+    SCHEMAS[table].forEach(field => {
+        if (data[field] !== undefined) {
+            // Special handling for hasTraffic (Client schema says TEXT, frontend might send boolean)
+            if (field === 'hasTraffic' && typeof data[field] === 'boolean') {
+                validData[field] = data[field] ? 'Sim' : 'Não';
+            } else {
+                validData[field] = data[field];
             }
-            return { ok: true };
-        } catch (e) {
-            return { ok: false, message: e.message };
         }
-    },
+    });
+    return validData;
+};
+
+export const db = {
     getAll: async (table) => {
         try {
-            const res = await fetch(`${API_URL}?type=${table}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+            const res = await fetch(`${API_URL}?type=${table}`);
             if (!res.ok) {
                 console.error(`Fetch error ${table}:`, res.statusText);
                 return [];
@@ -28,50 +57,35 @@ export const db = {
     },
     getById: async (table, id) => {
         try {
-            const res = await fetch(`${API_URL}?type=${table}&id=${id}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+            const res = await fetch(`${API_URL}?type=${table}&id=${id}`);
             if (!res.ok) return null;
             return await res.json();
         } catch (e) {
             return null;
         }
     },
-    getByEmail: async (email) => {
-        try {
-            const res = await fetch(`${API_URL}?type=users&email=${encodeURIComponent(email)}`, {
-                cache: 'no-store',
-                headers: { 'Cache-Control': 'no-cache' }
-            });
-            if (!res.ok) return null;
-            const users = await res.json();
-            return (users && users.length > 0) ? users[0] : null;
-        } catch (e) {
-            console.error("GetByEmail Error:", e);
-            throw e;
-        }
-    },
     add: async (table, item) => {
         try {
+            const cleanItem = sanitize(table, item);
             const res = await fetch(`${API_URL}?type=${table}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(item)
+                body: JSON.stringify(cleanItem)
             });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ error: res.statusText }));
-                throw new Error(err.error || err.message || "Add failed");
-            }
+            if (!res.ok) throw new Error("Add failed");
             return await res.json();
         } catch (e) {
             console.error("DB Add Error:", e);
-            throw e;
+            return null;
         }
     },
     update: async (table, id, updates) => {
         try {
+            const cleanUpdates = sanitize(table, updates);
             const res = await fetch(`${API_URL}?type=${table}&id=${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updates)
+                body: JSON.stringify(cleanUpdates)
             });
             if (!res.ok) throw new Error("Update failed");
             return await res.json();
@@ -91,14 +105,10 @@ export const db = {
     },
     authenticate: async (email, password) => {
         try {
-            const user = await db.getByEmail(email);
-            if (user && user.password === password) {
-                return user;
-            }
-            return null;
+            const users = await db.getAll('users');
+            return users.find(u => u.email === email && u.password === password) || null;
         } catch (e) {
-            console.error("Auth Error:", e);
-            throw e;
+            return null;
         }
     }
 };
