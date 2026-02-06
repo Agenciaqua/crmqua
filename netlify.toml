@@ -1,6 +1,9 @@
 [build]
-  command = "npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
+
+[context.production.environment]
+  CI = "false"
 
 [functions]
   directory = "netlify/functions"
@@ -11,4 +14,5 @@
   targetPort = 5173
 
 [environment]
-  NODE_VERSION = "20" # Force Node 20 LTS
+  NODE_VERSION = "20"
+  CI = "false"
