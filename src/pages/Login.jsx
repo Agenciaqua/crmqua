@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '0.7rem', opacity: 0.5 }}>v0.0.4 (Google Only)</p>
+                    <p style={{ marginTop: '10px', fontSize: '0.7rem', opacity: 0.5 }}>v0.0.5 (New Client ID)</p>
                 </div>
             </div>
         </div>
