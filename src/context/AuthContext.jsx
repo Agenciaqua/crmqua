@@ -26,9 +26,14 @@ export const AuthProvider = ({ children }) => {
 
 
 
-    const loginWithGoogle = async (userInfo) => {
+    const loginWithGoogle = async (userInfo, accessToken) => {
         try {
             const normalizedEmail = userInfo.email.trim().toLowerCase();
+
+            // Store Google Access Token for Drive API usage
+            if (accessToken) {
+                localStorage.setItem('qua_google_token', accessToken);
+            }
 
             // Check if user exists by email using server filter
             let userFound = await db.getByEmail(normalizedEmail);
@@ -64,6 +69,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setUser(null);
         localStorage.removeItem('qua_user_session');
+        localStorage.removeItem('qua_google_token');
     };
 
     const updateProfile = async (updates) => {
