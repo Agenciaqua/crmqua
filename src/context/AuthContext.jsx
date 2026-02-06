@@ -10,89 +10,98 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem('qua_user_session');
-            if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
-                setUser(JSON.parse(storedUser));
-            }
-        } catch (error) {
-            console.error("Session parse error:", error);
-            localStorage.removeItem('qua_user_session');
+        const storedUser = localStorage.getItem('qua_user_session');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
         setLoading(false);
     }, []);
 
+    const login = async (email, password) => {
+        const userFound = await db.authenticate(email, password);
+        if (userFound) {
+            setUser(userFound);
+            localStorage.setItem('qua_user_session', JSON.stringify(userFound));
+            return true;
+        }
+        return false;
+    };
 
+    const register = async (name, email, password) => {
+        // Check if exists
+        const allUsers = await db.getAll('users');
+        if (allUsers.find(u => u.email === email)) {
+            return false; // Already exists
+        }
 
+        const newUser = {
+            name,
+            email,
+            password, // In a real app, hash this!
+            role: null, // Force onboarding
+            createdAt: new Date().toLocaleDateString('pt-BR')
+        };
+        await db.add('users', newUser);
 
+        // Login immediately
+        const updatedUsers = await db.getAll('users');
+        const user = updatedUsers.find(u => u.email === email);
+        setUser(user);
+        localStorage.setItem('qua_user_session', JSON.stringify(user));
+        return true;
+    };
 
-    const loginWithGoogle = async (userInfo, accessToken) => {
+    const loginWithGoogle = async (userInfo) => {
         try {
-            const normalizedEmail = userInfo.email.trim().toLowerCase();
-
-            // Store Google Access Token for Drive API usage
-            if (accessToken) {
-                localStorage.setItem('qua_google_token', accessToken);
-            }
-
-            // Check if user exists by email using server filter
-            let userFound = await db.getByEmail(normalizedEmail);
+            // Check if user exists by email
+            const allUsers = await db.getAll('users');
+            let userFound = allUsers.find(u => u.email === userInfo.email);
 
             if (!userFound) {
                 // Register new user automatically
                 const newUser = {
                     name: userInfo.name,
-                    email: normalizedEmail,
-                    password: 'GOOGLE_OAUTH_USER', // Placeholder to satisfy DB NOT NULL constraint
+                    email: userInfo.email,
                     role: null, // Force onboarding
-                    avatar: userInfo.picture
+                    avatar: userInfo.picture,
+                    createdAt: new Date().toLocaleDateString('pt-BR')
                 };
                 // Add directly to DB
-                const createdUser = await db.add('users', newUser);
-                if (createdUser && createdUser.id) {
-                    userFound = createdUser;
-                }
+                await db.add('users', newUser);
+                // Fetch again to get ID
+                const updatedUsers = await db.getAll('users');
+                userFound = updatedUsers.find(u => u.email === userInfo.email);
             }
 
             if (userFound) {
                 setUser(userFound);
                 localStorage.setItem('qua_user_session', JSON.stringify(userFound));
-                return { success: true };
+                return true;
             }
-            return { success: false, error: "Não foi possível autenticar com o Google." };
+            return false;
         } catch (error) {
             console.error("Google Login Error:", error);
-            return { success: false, error: error.message };
+            return false;
         }
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('qua_user_session');
-        localStorage.removeItem('qua_google_token');
     };
 
     const updateProfile = async (updates) => {
-        try {
-            if (user) {
-                const updatedUser = await db.update('users', user.id, updates);
-                if (updatedUser) {
-                    setUser(updatedUser);
-                    localStorage.setItem('qua_user_session', JSON.stringify(updatedUser));
-                    return { success: true };
-                }
+        if (user) {
+            const updatedUser = await db.update('users', user.id, updates);
+            if (updatedUser) {
+                setUser(updatedUser);
+                localStorage.setItem('qua_user_session', JSON.stringify(updatedUser));
             }
-            return { success: false, error: "Usuário não logado ou falha na atualização." };
-        } catch (e) {
-            console.error("Update Profile Error:", e);
-            return { success: false, error: e.message };
         }
     };
 
-
-
     return (
-        <AuthContext.Provider value={{ user, logout, updateProfile, loading, loginWithGoogle }}>
+        <AuthContext.Provider value={{ user, login, logout, updateProfile, loading, loginWithGoogle, register }}>
             {!loading && children}
         </AuthContext.Provider>
     );

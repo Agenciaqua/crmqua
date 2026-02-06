@@ -227,7 +227,7 @@ export default function Login() {
                     <p style={{ marginBottom: '5px' }}>Credenciais Demo:</p>
                     <p>gestor@qua.com / 123</p>
                     <p>func@qua.com / 123</p>
-                    <p style={{ marginTop: '10px', fontSize: '0.7rem', opacity: 0.5 }}>v0.0.2 (Drive Enabled)</p>
+                    <p style={{ marginTop: '10px', fontSize: '0.7rem', opacity: 0.5 }}>v0.0.3 (Drive Fix)</p>
                 </div>
             </div>
         </div>
