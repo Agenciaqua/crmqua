@@ -71,7 +71,7 @@ export default function Dashboard() {
     const [chartData, setChartData] = useState([]);
 
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    // Task Modal Removed from Dashboard
     const [deferredPrompt, setDeferredPrompt] = useState(null);
 
     useEffect(() => {
@@ -195,7 +195,7 @@ export default function Dashboard() {
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px', color: '#AAA' }}>Ações Rápidas</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
                     <QuickAction icon={UserPlus} label="Novo Lead" onClick={() => setIsClientModalOpen(true)} />
-                    <QuickAction icon={Plus} label="Nova Tarefa" onClick={() => setIsTaskModalOpen(true)} />
+                    {/* Task Quick Action Removed per user request */}
                     <QuickAction icon={Upload} label="Enviar Arquivo" onClick={() => navigate('/arquivos')} />
                     {(user.role === 'Gestor' || user.role === 'manager') && (
                         <QuickAction icon={FileText} label="Ver Relatórios" onClick={() => navigate('/relatorios')} />
@@ -402,7 +402,6 @@ export default function Dashboard() {
             </div>
 
             {isClientModalOpen && <AddClientModal onClose={() => setIsClientModalOpen(false)} onSave={handleAddClient} />}
-            {isTaskModalOpen && <AddTaskModal onClose={() => setIsTaskModalOpen(false)} onSave={handleAddTask} />}
         </Layout>
     );
 }

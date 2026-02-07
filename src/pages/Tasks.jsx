@@ -72,8 +72,16 @@ export default function Tasks() {
 
     useEffect(() => {
         const loadTasks = async () => {
-            const allTasks = await db.getAll('tasks');
-            setTasks(allTasks);
+            try {
+                const allTasks = await db.getAll('tasks');
+                if (Array.isArray(allTasks)) {
+                    // Filter tasks for the current user (Owner or Assignee)
+                    // Or show all if Manager? For now, showing all to debug "disappearance"
+                    setTasks(allTasks);
+                }
+            } catch (error) {
+                console.error("Error loading tasks:", error);
+            }
         };
         loadTasks();
     }, []);
