@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { X, Save, User, Phone, Briefcase, Globe, Instagram, MapPin } from 'lucide-react';
 import { db } from '../services/database';
+import { useAuth } from '../context/AuthContext';
 
 const AddLeadModal = ({ onClose, onSave, initialData }) => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -57,7 +59,10 @@ const AddLeadModal = ({ onClose, onSave, initialData }) => {
             hasTraffic: formData.hasTraffic === 'Sim',
             status: initialData ? initialData.status : 'Prospecção', // Keep status if editing
             category: initialData ? initialData.category : 'Frio',
-            lastInteraction: new Date().toLocaleDateString('pt-BR')
+            status: initialData ? initialData.status : 'Prospecção', // Keep status if editing
+            category: initialData ? initialData.category : 'Frio',
+            lastInteraction: new Date().toLocaleDateString('pt-BR'),
+            ownerId: user.id
         };
 
         if (initialData && initialData.id) {

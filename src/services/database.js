@@ -5,7 +5,7 @@ const SCHEMAS = {
     clients: [
         'name', 'contact', 'email', 'phone', 'status', 'category',
         'lastInteraction', 'instagram', 'ownerId', 'role', 'relationship',
-        'businessType', 'hasTraffic', 'website', 'prospectingDay', 'notes'
+        'businessType', 'hasTraffic', 'website', 'prospectingDay', 'notes', 'source'
     ],
     tasks: [
         'title', 'assigneeId', 'status', 'priority', 'dueDate',

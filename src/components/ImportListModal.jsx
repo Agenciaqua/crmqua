@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { X, Upload, FileText, Loader2, Sparkles, Check } from 'lucide-react';
 import { db } from '../services/database';
+import { useAuth } from '../context/AuthContext';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const ImportListModal = ({ onClose, onSave }) => {
+    const { user } = useAuth();
     const [importMethod, setImportMethod] = useState('text'); // 'text' | 'file'
     const [textInput, setTextInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -95,7 +97,9 @@ const ImportListModal = ({ onClose, onSave }) => {
                 status: 'Prospecção',
                 category: 'Frio',
                 prospectingDay: 'Segunda-feira', // Default day if AI didn't catch it
-                lastInteraction: new Date().toLocaleDateString('pt-BR')
+                prospectingDay: 'Segunda-feira', // Default day if AI didn't catch it
+                lastInteraction: new Date().toLocaleDateString('pt-BR'),
+                ownerId: user.id
             })
         ));
 
