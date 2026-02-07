@@ -5,7 +5,15 @@ import { useAuth } from '../context/AuthContext';
 import { X, Calendar, AlignLeft, User, Tag } from 'lucide-react';
 
 const AddTaskModal = ({ onClose, onSave }) => {
-    const { user } = useAuth();
+    const auth = useAuth();
+    const user = auth?.user;
+
+    // Safety check: If auth context is missing, don't render (or show error)
+    if (!user) {
+        console.error("AddTaskModal: User is missing from Auth Context");
+        return null;
+    }
+
     const [task, setTask] = useState({
         title: '',
         assigneeId: '',
@@ -15,15 +23,24 @@ const AddTaskModal = ({ onClose, onSave }) => {
         type: 'Reunião'
     });
     const [users, setUsers] = useState([]);
+    const [loadingUsers, setLoadingUsers] = useState(true);
 
     useEffect(() => {
+        let mounted = true;
         const loadUsers = async () => {
-            const allUsers = await db.getAll('users');
-            if (Array.isArray(allUsers)) {
-                setUsers(allUsers);
+            try {
+                const allUsers = await db.getAll('users');
+                if (mounted && Array.isArray(allUsers)) {
+                    setUsers(allUsers);
+                }
+            } catch (err) {
+                console.error("Error loading users:", err);
+            } finally {
+                if (mounted) setLoadingUsers(false);
             }
         };
         loadUsers();
+        return () => { mounted = false; };
     }, []);
 
     const handleSubmit = (e) => {
@@ -76,8 +93,9 @@ const AddTaskModal = ({ onClose, onSave }) => {
                                 <User size={14} /> Responsável
                             </label>
                             <select required value={task.assigneeId} onChange={e => setTask({ ...task, assigneeId: e.target.value })} style={{ width: '100%' }}>
+                                {loadingUsers && <option value="">Carregando...</option>}
                                 <option value="">Selecione...</option>
-                                {Array.isArray(users) && users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                             </select>
                         </div>
                     </div>
@@ -119,7 +137,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                         <button type="button" onClick={onClose} className="btn-ghost" style={{ flex: 1, border: '1px solid rgba(255,255,255,0.2)' }}>Cancelar</button>
                         <button type="submit" className="btn-primary" style={{ flex: 1 }}>Criar Tarefa</button>
                     </div>
