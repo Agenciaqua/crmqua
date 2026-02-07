@@ -19,7 +19,9 @@ const AddTaskModal = ({ onClose, onSave }) => {
     useEffect(() => {
         const loadUsers = async () => {
             const allUsers = await db.getAll('users');
-            setUsers(allUsers);
+            if (Array.isArray(allUsers)) {
+                setUsers(allUsers);
+            }
         };
         loadUsers();
     }, []);
@@ -75,7 +77,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
                             </label>
                             <select required value={task.assigneeId} onChange={e => setTask({ ...task, assigneeId: e.target.value })} style={{ width: '100%' }}>
                                 <option value="">Selecione...</option>
-                                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                                {Array.isArray(users) && users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                             </select>
                         </div>
                     </div>
