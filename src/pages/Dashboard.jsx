@@ -162,13 +162,23 @@ export default function Dashboard() {
     };
 
     const handleAddTask = async (task) => {
-        await db.add('tasks', { ...task, assigneeId: Number(task.assigneeId) });
+        // Modal already formats the task correctly with ownerId
+        // Just ensure assigneeId is a number if it exists
+        const formattedTask = {
+            ...task,
+            assigneeId: task.assigneeId ? Number(task.assigneeId) : null
+        };
+        await db.add('tasks', formattedTask);
         refreshData();
     };
 
     const handleCompleteTask = async (task) => {
         await db.update('tasks', task.id, { status: 'done' });
         refreshData();
+    };
+
+    const isIOS = () => {
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
     };
 
     return (
@@ -190,15 +200,22 @@ export default function Dashboard() {
                     {(user.role === 'Gestor' || user.role === 'manager') && (
                         <QuickAction icon={FileText} label="Ver Relatórios" onClick={() => navigate('/relatorios')} />
                     )}
-                    {/* Always show button for Gestor to debug, or if prompt exists */}
-                    {(deferredPrompt || user.role === 'Gestor') && (
-                        <QuickAction
-                            icon={ArrowDownRight}
-                            label="Instalar App"
-                            onClick={handleInstallClick}
-                            style={{ opacity: deferredPrompt ? 1 : 0.5 }}
-                        />
-                    )}
+
+                    {/* Install App Button - Shows for Everyone (Smart Logic) */}
+                    <QuickAction
+                        icon={ArrowDownRight}
+                        label="Instalar App"
+                        onClick={() => {
+                            if (deferredPrompt) {
+                                handleInstallClick();
+                            } else if (isIOS()) {
+                                alert("Para instalar no iPhone:\n1. Toque no botão de Compartilhar (quadrado com seta).\n2. Role para baixo e toque em 'Adicionar à Tela de Início'.");
+                            } else {
+                                alert("Para instalar:\nToque no menu do navegador (três pontos) e selecione 'Adicionar à Tela Inicial' ou 'Instalar Aplicativo'.");
+                            }
+                        }}
+                        style={{ opacity: 1 }}
+                    />
                 </div>
             </section>
 
