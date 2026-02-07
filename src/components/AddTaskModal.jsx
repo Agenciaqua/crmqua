@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { db } from '../services/database';
+import { useAuth } from '../context/AuthContext';
 import { X, Calendar, AlignLeft, User, Tag } from 'lucide-react';
 
 const AddTaskModal = ({ onClose, onSave }) => {
+    const { user } = useAuth();
     const [task, setTask] = useState({
         title: '',
         assigneeId: '',
@@ -24,7 +26,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...task, status: 'todo' });
+        onSave({ ...task, status: 'todo', ownerId: user.id });
         onClose();
     };
 

@@ -54,7 +54,7 @@ export default function Clients() {
     };
 
     const filteredClients = clients.filter(client => {
-        if (client.status === 'Prospecção') return false;
+        // if (client.status === 'Prospecção') return false; // REMOVED: Show all leads
 
         const isLeadTab = activeTab === 'Lead';
         const matchesTab = isLeadTab

@@ -9,7 +9,7 @@ const SCHEMAS = {
     ],
     tasks: [
         'title', 'assigneeId', 'status', 'priority', 'dueDate',
-        'description', 'type'
+        'description', 'type', 'ownerId'
     ],
     users: [
         'name', 'email', 'password', 'role', 'avatar'
