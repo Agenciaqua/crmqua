@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../services/database';
 import { useAuth } from '../context/AuthContext';
 import { X, Calendar, AlignLeft, User, Tag } from 'lucide-react';
