@@ -56,7 +56,8 @@ const AIChatWidget = () => {
 
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+            // Use specific stable model version
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             // Context Prompt
             const prompt = `
@@ -73,7 +74,12 @@ const AIChatWidget = () => {
 
         } catch (error) {
             console.error("Erro Gemini:", error);
-            setMessages(prev => [...prev, { id: Date.now() + 1, text: "Desculpe, tive um erro ao conectar com o cérebro da IA. Verifique sua chave de API ou conexão.", sender: 'ai' }]);
+            // Show actual error message to help debugging
+            setMessages(prev => [...prev, {
+                id: Date.now() + 1,
+                text: `❌ Erro Técnico: ${error.message || error.toString()}\n\nVerifique se a chave API está ativa e se o modelo 'gemini-1.5-flash' está disponível.`,
+                sender: 'ai'
+            }]);
         } finally {
             setIsTyping(false);
         }

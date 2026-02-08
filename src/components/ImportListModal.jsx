@@ -30,7 +30,7 @@ const ImportListModal = ({ onClose, onSave }) => {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const prompt = `
                 Analise o texto abaixo que contém uma lista de leads imobiliários.
@@ -70,7 +70,7 @@ const ImportListModal = ({ onClose, onSave }) => {
 
         } catch (error) {
             console.error("Erro ao processar:", error);
-            alert("Erro ao processar com IA. Verifique o console.");
+            alert(`Erro na IA: ${error.message || error.toString()}`);
         } finally {
             setIsProcessing(false);
         }
