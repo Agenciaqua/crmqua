@@ -30,7 +30,7 @@ const ImportListModal = ({ onClose, onSave }) => {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
             const prompt = `
                 Analise o texto abaixo que contém uma lista de leads imobiliários.

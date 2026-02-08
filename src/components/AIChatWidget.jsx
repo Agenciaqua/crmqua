@@ -56,8 +56,8 @@ const AIChatWidget = () => {
 
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
-            // Use specific stable model version
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            // Use standard gemini-pro model (most compatible)
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
             // Context Prompt
             const prompt = `
