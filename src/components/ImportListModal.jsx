@@ -5,6 +5,8 @@ import { db } from '../services/database';
 import { useAuth } from '../context/AuthContext';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+import { GEMINI_API_KEY } from '../services/ai-config';
+
 const ImportListModal = ({ onClose, onSave }) => {
     const { user } = useAuth();
     const [importMethod, setImportMethod] = useState('text'); // 'text' | 'file'
@@ -12,7 +14,7 @@ const ImportListModal = ({ onClose, onSave }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [parsedLeads, setParsedLeads] = useState([]);
     const [step, setStep] = useState(1); // 1: Input, 2: Review
-    import { GEMINI_API_KEY } from '../services/ai-config';
+
     const apiKey = GEMINI_API_KEY;
 
     const handleProcess = async () => {

@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Sparkles, Copy, Check, AlertTriangle } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+import { GEMINI_API_KEY } from '../services/ai-config';
+
 const AIChatWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
@@ -12,8 +14,6 @@ const AIChatWidget = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [apiKeyMissing, setApiKeyMissing] = useState(false);
     const messagesEndRef = useRef(null);
-
-    import { GEMINI_API_KEY } from '../services/ai-config';
 
     const apiKey = GEMINI_API_KEY;
 
