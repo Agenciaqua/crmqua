@@ -117,11 +117,37 @@ export const handler = async (event, context) => {
 
                 if (columns.length === 0) throw new Error("No data to insert");
 
-                result = await sql.query(`
-          INSERT INTO ${type} (${columns.join(', ')}) 
-          VALUES (${placeholders}) 
-          RETURNING *
-        `, values);
+                try {
+                    result = await sql.query(`
+                      INSERT INTO ${type} (${columns.join(', ')}) 
+                      VALUES (${placeholders}) 
+                      RETURNING *
+                    `, values);
+                } catch (err) {
+                    // Self-healing: Detect missing columns and add them dynamically
+                    const missingColumnMatch = err.message.match(/column "(.+)" of relation ".+" does not exist/);
+
+                    if (missingColumnMatch) {
+                        const missingCol = missingColumnMatch[1];
+                        console.log(`⚠️ Auto-fixing DB: Adding missing column '${missingCol}' to '${type}'...`);
+
+                        // Add the column with a generic type (TEXT is safest mostly, or INTEGER for Id)
+                        // Heuristic for types based on name suffix
+                        const colType = missingCol.endsWith('Id') ? 'INTEGER' : 'TEXT';
+
+                        await sql.query(`ALTER TABLE ${type} ADD COLUMN IF NOT EXISTS ${missingCol} ${colType}`);
+
+                        // Retry the insertion
+                        result = await sql.query(`
+                          INSERT INTO ${type} (${columns.join(', ')}) 
+                          VALUES (${placeholders}) 
+                          RETURNING *
+                        `, values);
+                    } else {
+                        // Re-throw if it's not a missing column error
+                        throw err;
+                    }
+                }
 
                 return {
                     statusCode: 201,
@@ -138,12 +164,33 @@ export const handler = async (event, context) => {
 
                 const setClause = putColumns.map((col, i) => `${col} = $${i + 1}`).join(', ');
 
-                result = await sql.query(`
-          UPDATE ${type} 
-          SET ${setClause} 
-          WHERE id = $${putValues.length + 1}
-          RETURNING *
-        `, [...putValues, id]);
+                try {
+                    result = await sql.query(`
+                      UPDATE ${type} 
+                      SET ${setClause} 
+                      WHERE id = $${putValues.length + 1}
+                      RETURNING *
+                    `, [...putValues, id]);
+                } catch (err) {
+                    // Self-healing for UPDATE as well
+                    const missingColumnMatch = err.message.match(/column "(.+)" of relation ".+" does not exist/);
+                    if (missingColumnMatch) {
+                        const missingCol = missingColumnMatch[1];
+                        console.log(`⚠️ Auto-fixing DB (Update): Adding missing column '${missingCol}' to '${type}'...`);
+                        const colType = missingCol.endsWith('Id') ? 'INTEGER' : 'TEXT';
+                        await sql.query(`ALTER TABLE ${type} ADD COLUMN IF NOT EXISTS ${missingCol} ${colType}`);
+
+                        // Retry
+                        result = await sql.query(`
+                           UPDATE ${type} 
+                           SET ${setClause} 
+                           WHERE id = $${putValues.length + 1}
+                           RETURNING *
+                         `, [...putValues, id]);
+                    } else {
+                        throw err;
+                    }
+                }
 
                 return {
                     statusCode: 200,
