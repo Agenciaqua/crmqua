@@ -2,6 +2,13 @@
   command = "npm install && npm run build"
   publish = "dist"
 
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
 [context.production.environment]
   CI = "false"
   VITE_GOOGLE_CLIENT_ID = "10140415974-5mc9kemi9mqb0hnk8a5vur406jhkvoha.apps.googleusercontent.com"

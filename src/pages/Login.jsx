@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF1493', fontWeight: 'bold', border: '1px solid #FF1493', padding: '5px', borderRadius: '5px' }}>v0.2.16 (Final Fix)</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF00FF', fontWeight: 'bold', border: '1px solid #FF00FF', padding: '5px', borderRadius: '5px' }}>v0.3.0 (Cache Killer)</p>
                 </div>
             </div>
         </div>
