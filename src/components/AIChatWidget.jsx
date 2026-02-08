@@ -6,6 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GEMINI_API_KEY } from '../services/ai-config';
 
 const AIChatWidget = () => {
+    console.log("AI Chat Widget Loaded v0.2.8");
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { id: 1, text: "Olá! Sou seu assistente de vendas com IA do Google Gemini. 🤖\n\nPosso criar scripts personalizados, feedbacks e muito mais. Como posso ajudar com sua prospecção hoje?", sender: 'ai' }

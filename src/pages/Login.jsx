@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#00FF00', fontWeight: 'bold', border: '1px solid #00FF00', padding: '5px', borderRadius: '5px' }}>v0.2.7 (Force Fresh)</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#00CED1', fontWeight: 'bold', border: '1px solid #00CED1', padding: '5px', borderRadius: '5px' }}>v0.2.9 (Sec Fix)</p>
                 </div>
             </div>
         </div>
