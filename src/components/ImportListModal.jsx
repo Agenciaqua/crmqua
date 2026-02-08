@@ -8,7 +8,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GEMINI_API_KEY } from '../services/ai-config';
 
 const ImportListModal = ({ onClose, onSave }) => {
-    console.log("Import List Modal Loaded v0.2.8");
+    console.log("Import List Modal Loaded v0.2.16");
     const { user } = useAuth();
     const [importMethod, setImportMethod] = useState('text'); // 'text' | 'file'
     const [textInput, setTextInput] = useState('');

@@ -6,7 +6,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GEMINI_API_KEY } from '../services/ai-config';
 
 const AIChatWidget = () => {
-    console.log("AI Chat Widget Loaded v0.2.8");
+    console.log("AI Chat Widget Loaded v0.2.16");
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { id: 1, text: "Olá! Sou seu assistente de vendas com IA do Google Gemini. 🤖\n\nPosso criar scripts personalizados, feedbacks e muito mais. Como posso ajudar com sua prospecção hoje?", sender: 'ai' }
@@ -56,8 +56,8 @@ const AIChatWidget = () => {
 
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
-            // Attempt gemini-1.5-flash again, but with diagnostics if it fails
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            // Verified model from test script
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
             // Context Prompt
             const prompt = `

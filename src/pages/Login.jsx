@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#7FFF00', fontWeight: 'bold', border: '1px solid #7FFF00', padding: '5px', borderRadius: '5px' }}>v0.2.15 (Gemini 2.0)</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF1493', fontWeight: 'bold', border: '1px solid #FF1493', padding: '5px', borderRadius: '5px' }}>v0.2.16 (Final Fix)</p>
                 </div>
             </div>
         </div>
