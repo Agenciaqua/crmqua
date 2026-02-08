@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF00FF', fontWeight: 'bold', border: '1px solid #FF00FF', padding: '5px', borderRadius: '5px' }}>v0.2.2 (Migration)</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FFA500', fontWeight: 'bold', border: '1px solid #FFA500', padding: '5px', borderRadius: '5px' }}>v0.2.3 (Auto-Repair)</p>
                 </div>
             </div>
         </div>
