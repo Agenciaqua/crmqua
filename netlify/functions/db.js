@@ -25,7 +25,10 @@ export const handler = async (event, context) => {
             };
         }
 
-        if (!process.env.DATABASE_URL) {
+        // Use process.env OR fallback to the user-provided URL (Critical Fix requested by User)
+        let connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_QfdY9V0ybcZz@ep-silent-hill-acfawx0o-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+
+        if (!connectionString) {
             console.error("Missing DATABASE_URL");
             return {
                 statusCode: 500,
@@ -35,7 +38,6 @@ export const handler = async (event, context) => {
         }
 
         // SMART FIX: Clean connection string if user copied the full "psql" command
-        let connectionString = process.env.DATABASE_URL;
         if (connectionString.startsWith("psql")) {
             // Remove "psql '" prefix and trailing "'"
             connectionString = connectionString.replace(/^psql\s+'/, '').replace(/'$/, '');
