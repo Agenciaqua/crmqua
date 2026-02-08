@@ -12,7 +12,8 @@ const ImportListModal = ({ onClose, onSave }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [parsedLeads, setParsedLeads] = useState([]);
     const [step, setStep] = useState(1); // 1: Input, 2: Review
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    import { GEMINI_API_KEY } from '../services/ai-config';
+    const apiKey = GEMINI_API_KEY;
 
     const handleProcess = async () => {
         if (!textInput.trim()) return;

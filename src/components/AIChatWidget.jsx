@@ -13,7 +13,9 @@ const AIChatWidget = () => {
     const [apiKeyMissing, setApiKeyMissing] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    import { GEMINI_API_KEY } from '../services/ai-config';
+
+    const apiKey = GEMINI_API_KEY;
 
     useEffect(() => {
         if (!apiKey) {
