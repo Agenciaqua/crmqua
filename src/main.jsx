@@ -3,20 +3,6 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/global.css'
 
-// 🗑️ NUKE CACHE: Force unregister Service Workers
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function (registrations) {
-    for (let registration of registrations) {
-      console.log("🔥 Unregistering SW:", registration);
-      registration.unregister();
-    }
-    if (registrations.length > 0) {
-      console.log("♻️ Service Worker killed. Reloading...");
-      window.location.reload();
-    }
-  });
-}
-
 // Global Error Handler for startup
 window.onerror = function (message, source, lineno, colno, error) {
   const root = document.getElementById('root');
