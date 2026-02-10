@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../services/database';
 import AddTaskModal from '../components/AddTaskModal';
 
-const TaskCard = ({ task, onMove }) => {
+const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
     const [assigneeName, setAssigneeName] = React.useState('Carregando...');
 
     React.useEffect(() => {
@@ -60,10 +60,10 @@ const TaskCard = ({ task, onMove }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <button onClick={() => onEdit(task)} className="btn-ghost" style={{ padding: '4px', color: '#AAA' }} title="Editar">
-                        <User size={14} /> {/* Using User icon temporarily as Pencil if not available loop, wait checking imports */}
+                        <Pencil size={14} />
                     </button>
                     <button onClick={() => onDelete(task.id)} className="btn-ghost" style={{ padding: '4px', color: '#ff4d4d' }} title="Excluir">
-                        <AlertCircle size={14} /> {/* Using AlertCircle as Trash temp */}
+                        <Trash2 size={14} />
                     </button>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -182,11 +182,11 @@ export default function Tasks() {
                             background: 'rgba(0,0,0,0.2)',
                             overflowY: 'auto'
                         }}>
-                            {filterTasks(key).map(task => 
-                                <TaskCard 
-                                    key={task.id} 
-                                    task={task} 
-                                    onMove={handleMoveTask} 
+                            {filterTasks(key).map(task =>
+                                <TaskCard
+                                    key={task.id}
+                                    task={task}
+                                    onMove={handleMoveTask}
                                     onEdit={openEditModal}
                                     onDelete={handleDeleteTask}
                                 />

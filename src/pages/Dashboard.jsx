@@ -140,11 +140,13 @@ export default function Dashboard() {
 
                 // Count where interaction happened on this day
                 // Logic updated: Any active client with interaction on this date is considered "Contacted"
-                const count = clients.filter(c =>
-                    c.lastInteraction === dateStrPT &&
-                    c.status !== 'Inativo' &&
-                    c.status !== 'Arquivado'
-                ).length;
+                // Normalize dates to prevent mismatch (e.g. 01/01/2024 vs 1/1/2024)
+                const count = clients.filter(c => {
+                    if (!c.lastInteraction) return false;
+                    return c.lastInteraction === dateStrPT &&
+                        c.status !== 'Inativo' &&
+                        c.status !== 'Arquivado';
+                }).length;
 
                 weekData.push({ name: days[i], leads: count });
             }
