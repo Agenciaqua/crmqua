@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/global.css'
 
+console.log("🚀 BUILD TIMESTAMP: " + new Date().toLocaleString());
+
 // Global Error Handler for startup
 window.onerror = function (message, source, lineno, colno, error) {
   const root = document.getElementById('root');
