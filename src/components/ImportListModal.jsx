@@ -29,47 +29,62 @@ const ImportListModal = ({ onClose, onSave }) => {
                 return;
             }
 
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-lite-001", "gemini-pro"];
+            let success = false;
 
-            const prompt = `
-                Analise o texto abaixo que contém uma lista de leads imobiliários.
-                Extraia as informações e retorne UM ARRAY JSON estrito.
-                Cada objeto deve ter:
-                - name: Nome do lead (string)
-                - phone: Telefone com DDD (string)
-                - role: Cargo/Profissão (string, ex: Corretor, Diretor)
-                - instagram: Usuário ou link do insta (string)
-                - businessType: Uma destas opções: "Corretor", "Imobiliária", "Construtora", "Incorporadora", "Loteadora" (string)
-                - source: Origem do lead ("Tráfego Pago", "Instagram", "Recomendação", "Prospecção Outbound", "Outros") (string)
-                - hasTraffic: Se faz tráfego pago (boolean)
-                - website: URL do site ou se tem site (string)
-                - notes: Outras observações relevantes (string)
+            for (const modelName of modelsToTry) {
+                try {
+                    console.log(`📊 Import IA tentando: ${modelName}`);
+                    const genAI = new GoogleGenerativeAI(apiKey);
+                    const model = genAI.getGenerativeModel({ model: modelName });
 
-                Se algum campo não for encontrado, deixe como string vazia ou false.
-                NÃO escreva nada além do JSON.
-                
-                Texto para analisar:
-                "${textInput}"
-            `;
+                    const prompt = `
+                        Analise o texto abaixo que contém uma lista de leads imobiliários.
+                        Extraia as informações e retorne UM ARRAY JSON estrito.
+                        Cada objeto deve ter:
+                        - name: Nome do lead (string)
+                        - phone: Telefone com DDD (string)
+                        - role: Cargo/Profissão (string, ex: Corretor, Diretor)
+                        - instagram: Usuário ou link do insta (string)
+                        - businessType: Uma destas opções: "Corretor", "Imobiliária", "Construtora", "Incorporadora", "Loteadora" (string)
+                        - source: Origem do lead ("Tráfego Pago", "Instagram", "Recomendação", "Prospecção Outbound", "Outros") (string)
+                        - hasTraffic: Se faz tráfego pago (boolean)
+                        - website: URL do site ou se tem site (string)
+                        - notes: Outras observações relevantes (string)
+        
+                        Se algum campo não for encontrado, deixe como string vazia ou false.
+                        NÃO escreva nada além do JSON.
+                        
+                        Texto para analisar:
+                        "${textInput}"
+                    `;
 
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+                    const result = await model.generateContent(prompt);
+                    const response = await result.response;
+                    const text = response.text();
 
-            // Cleanup markdown code blocks if present
-            const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-            const leads = JSON.parse(cleanText);
+                    // Cleanup markdown code blocks if present
+                    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const leads = JSON.parse(cleanText);
 
-            if (Array.isArray(leads)) {
-                setParsedLeads(leads);
-                setStep(2);
-            } else {
-                alert("A IA não conseguiu formatar corretamente. Tente simplificar a lista.");
+                    if (Array.isArray(leads)) {
+                        setParsedLeads(leads);
+                        setStep(2);
+                        success = true;
+                        break; // Exit loop on success
+                    }
+                } catch (err) {
+                    console.warn(`⚠️ Modelo ${modelName} falhou ou retornou inválido:`, err.message);
+                    // Continue to next model
+                }
+            }
+
+            if (!success) {
+                alert("Falha Crítica: Todos os modelos de IA falharam ou você excedeu sua cota gratuita hoje.");
             }
 
         } catch (error) {
-            console.error("Erro ao processar:", error);
+            console.error("Erro fatal:", error);
             alert(`Erro na IA: ${error.message || error.toString()}`);
         } finally {
             setIsProcessing(false);

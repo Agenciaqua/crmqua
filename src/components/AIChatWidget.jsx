@@ -54,35 +54,46 @@ const AIChatWidget = () => {
             return;
         }
 
-        try {
-            const genAI = new GoogleGenerativeAI(apiKey);
-            // Verified model from test script
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-lite-001", "gemini-pro"];
+        let lastError = null;
 
-            // Context Prompt
-            const prompt = `
-                Você é um assistente especialista em vendas B2B e CRM. Seu objetivo é ajudar o usuário a vender mais.
-                Responda de forma curta, direta e persuasiva e em PORTUGUÊS.
-                O usuário pediu: "${text}"
-            `;
+        for (const modelName of modelsToTry) {
+            try {
+                console.log(`🤖 Tentando modelo: ${modelName}...`);
+                const genAI = new GoogleGenerativeAI(apiKey);
+                const model = genAI.getGenerativeModel({ model: modelName });
 
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const aiText = response.text();
+                // Context Prompt
+                const prompt = `
+                    Você é um assistente especialista em vendas B2B e CRM. Seu objetivo é ajudar o usuário a vender mais.
+                    Responda de forma curta, direta e persuasiva e em PORTUGUÊS.
+                    O usuário pediu: "${text}"
+                `;
 
-            setMessages(prev => [...prev, { id: Date.now() + 1, text: aiText, sender: 'ai' }]);
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const aiText = response.text();
 
-        } catch (error) {
-            console.error("Erro Gemini:", error);
-            // Show actual error message to help debugging
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                text: `❌ Erro Técnico: ${error.message || error.toString()}\n\nVerifique se a chave API está ativa e se o modelo 'gemini-1.5-flash' está disponível.`,
-                sender: 'ai'
-            }]);
-        } finally {
-            setIsTyping(false);
+                setMessages(prev => [...prev, { id: Date.now() + 1, text: aiText, sender: 'ai' }]);
+                setIsTyping(false);
+                return; // Success! Exit loop
+
+            } catch (error) {
+                console.warn(`❌ Falha no modelo ${modelName}:`, error.message);
+                lastError = error;
+                // Create a small delay before retrying to avoid hammering
+                await new Promise(r => setTimeout(r, 1000));
+            }
         }
+
+        // If we get here, all models failed
+        console.error("Todas as tentativas de IA falharam:", lastError);
+        setMessages(prev => [...prev, {
+            id: Date.now() + 1,
+            text: `❌ Erro Fatal: Não foi possível conectar a nenhum modelo de IA.\n\nÚltimo erro: ${lastError.message || lastError.toString()}\n\nVerifique se sua cota gratuita (Quota) não foi excedida em aistudio.google.com.`,
+            sender: 'ai'
+        }]);
+        setIsTyping(false);
     };
 
     const QuickButton = ({ label, query }) => (
