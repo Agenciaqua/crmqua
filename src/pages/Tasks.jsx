@@ -195,7 +195,7 @@ export default function Tasks() {
                     </div>
                 ))}
             </div>
-            {isModalOpen && <AddTaskModal onClose={() => setIsModalOpen(false)} onSave={handleCreateTask} />}
+            {isModalOpen && <AddTaskModal onClose={() => { setIsModalOpen(false); setSelectedTask(null); }} onSave={handleCreateOrUpdateTask} initialData={selectedTask} />}
         </Layout>
     );
 }
