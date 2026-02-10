@@ -4,7 +4,7 @@ import { db } from '../services/database';
 import { useAuth } from '../context/AuthContext';
 import { X, Calendar, AlignLeft, User, Tag } from 'lucide-react';
 
-const AddTaskModal = ({ onClose, onSave }) => {
+const AddTaskModal = ({ onClose, onSave, initialData }) => {
     const auth = useAuth();
     const user = auth?.user;
 
@@ -22,6 +22,16 @@ const AddTaskModal = ({ onClose, onSave }) => {
         description: '',
         type: 'Reunião'
     });
+
+    useEffect(() => {
+        if (initialData) {
+            setTask({
+                ...initialData,
+                assigneeId: initialData.assigneeId || '',
+            });
+        }
+    }, [initialData]);
+
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
 
@@ -45,7 +55,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...task, status: 'todo', ownerId: user.id });
+        onSave({ ...task, status: initialData ? task.status : 'todo', ownerId: initialData ? task.ownerId : user.id });
         onClose();
     };
 
@@ -53,7 +63,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
             <div className="glass-panel" style={{ padding: '40px', width: '600px', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '90vh', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                    <h2 style={{ fontSize: '1.8rem', fontWeight: '300' }}>Nova Tarefa</h2>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '300' }}>{initialData ? 'Editar Tarefa' : 'Nova Tarefa'}</h2>
                     <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}><X size={24} /></button>
                 </div>
 
@@ -139,7 +149,7 @@ const AddTaskModal = ({ onClose, onSave }) => {
 
                     <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
                         <button type="button" onClick={onClose} className="btn-ghost" style={{ flex: 1, border: '1px solid rgba(255,255,255,0.2)' }}>Cancelar</button>
-                        <button type="submit" className="btn-primary" style={{ flex: 1 }}>Criar Tarefa</button>
+                        <button type="submit" className="btn-primary" style={{ flex: 1 }}>{initialData ? 'Salvar Alterações' : 'Criar Tarefa'}</button>
                     </div>
                 </form>
             </div>

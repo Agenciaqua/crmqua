@@ -138,10 +138,12 @@ export default function Dashboard() {
                 d.setDate(startOfWeek.getDate() + i);
                 const dateStrPT = d.toLocaleDateString('pt-BR'); // DD/MM/YYYY matching client.lastInteraction
 
-                // Count where interaction happened on this day AND they are marked as Contacted (moved from prospecting)
+                // Count where interaction happened on this day
+                // Logic updated: Any active client with interaction on this date is considered "Contacted"
                 const count = clients.filter(c =>
                     c.lastInteraction === dateStrPT &&
-                    (c.relationship === 'Contacted' || c.status === 'Lead')
+                    c.status !== 'Inativo' &&
+                    c.status !== 'Arquivado'
                 ).length;
 
                 weekData.push({ name: days[i], leads: count });
