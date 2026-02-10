@@ -8,16 +8,32 @@ import AddTaskModal from '../components/AddTaskModal';
 
 const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
     const [assigneeName, setAssigneeName] = React.useState('Carregando...');
+    const [ownerName, setOwnerName] = React.useState('');
 
     React.useEffect(() => {
-        const loadAssignee = async () => {
-            const user = await db.getById('users', task.assigneeId);
-            setAssigneeName(user ? user.name : 'Desconhecido');
+        const loadInfo = async () => {
+            if (task.assigneeId) {
+                const user = await db.getById('users', task.assigneeId);
+                setAssigneeName(user ? user.name : 'Desconhecido');
+            } else {
+                setAssigneeName('Não Atribuído');
+            }
+
+            if (task.ownerId) {
+                const owner = await db.getById('users', task.ownerId);
+                setOwnerName(owner ? owner.name : '');
+            }
         };
-        loadAssignee();
-    }, [task.assigneeId]);
+        loadInfo();
+    }, [task.assigneeId, task.ownerId]);
 
     const priorityColor = task.priority === 'high' ? '#f44336' : task.priority === 'medium' ? 'var(--color-orange)' : '#4caf50';
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
+    };
 
     return (
         <div className="glass-panel glass-panel-interactive" style={{
@@ -51,9 +67,14 @@ const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
                     <User size={14} />
                     <span>{assigneeName}</span>
                 </div>
+                {ownerName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontStyle: 'italic', color: '#666' }}>
+                        <span>Criado por: {ownerName}</span>
+                    </div>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Calendar size={14} />
-                    <span>{task.dueDate}</span>
+                    <span>{formatDate(task.dueDate)}</span>
                 </div>
             </div>
 
@@ -105,7 +126,11 @@ export default function Tasks() {
     }, [user]);
 
     const handleCreateOrUpdateTask = async (taskData) => {
-        const formattedTask = { ...taskData, assigneeId: Number(taskData.assigneeId) };
+        const formattedTask = {
+            ...taskData,
+            assigneeId: taskData.assigneeId ? Number(taskData.assigneeId) : null,
+            dueDate: taskData.dueDate || null
+        };
 
         if (selectedTask) {
             // Edit Mode
