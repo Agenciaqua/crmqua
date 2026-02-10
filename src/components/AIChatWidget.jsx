@@ -54,7 +54,8 @@ const AIChatWidget = () => {
             return;
         }
 
-        const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-lite-001", "gemini-pro"];
+        // Optimized list based on user key permissions (No gemini-pro)
+        const modelsToTry = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-flash"];
         let lastError = null;
 
         for (const modelName of modelsToTry) {
