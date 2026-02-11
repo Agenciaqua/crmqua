@@ -25,7 +25,12 @@ const CalendarView = ({ meetings, onDateClick, onMeetingClick }) => {
 
     const getMeetingsForDay = (day) => {
         const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        return meetings.filter(m => m.date === dateStr);
+        return meetings.filter(m => {
+            if (!m.date) return false;
+            // Robustly handle YYYY-MM-DD or ISO strings
+            const mDate = m.date.substring(0, 10);
+            return mDate === dateStr;
+        });
     };
 
     return (
@@ -117,7 +122,11 @@ export default function Meetings() {
             db.getAll('meetings'),
             db.getAll('clients')
         ]);
-        setMeetings(allMeetings.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)));
+        setMeetings(allMeetings.sort((a, b) => {
+            const da = a.date ? a.date.substring(0, 10) : '0000-00-00';
+            const db = b.date ? b.date.substring(0, 10) : '0000-00-00';
+            return (da + a.time).localeCompare(db + b.time);
+        }));
         setClients(allClients);
     };
 
@@ -216,9 +225,16 @@ export default function Meetings() {
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', border: '1px solid rgba(255, 77, 0, 0.2)'
                                 }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-orange)', textTransform: 'uppercase' }}>
-                                        {new Date(m.date + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short' })}
+                                        {(() => {
+                                            try {
+                                                const d = m.date ? new Date(m.date.substring(0, 10) + 'T12:00:00') : new Date();
+                                                return d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+                                            } catch (e) { return 'ERR'; }
+                                        })()}
                                     </span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: '700' }}>{m.date.split('-')[2]}</span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: '700' }}>
+                                        {m.date ? m.date.substring(0, 10).split('-')[2] : '--'}
+                                    </span>
                                 </div>
 
                                 <div>

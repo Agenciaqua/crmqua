@@ -110,9 +110,14 @@ export default function Dashboard() {
             const now = new Date();
 
             // Filter upcoming meetings (today onwards)
+            // Filter upcoming meetings (today onwards)
             const futureMeetings = meetings
-                .filter(m => m.date >= todayStr)
-                .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+                .filter(m => m.date && m.date.substring(0, 10) >= todayStr)
+                .sort((a, b) => {
+                    const da = a.date ? a.date.substring(0, 10) : '0000-00-00';
+                    const db = b.date ? b.date.substring(0, 10) : '0000-00-00';
+                    return (da + a.time).localeCompare(db + b.time);
+                });
 
             setStats({
                 clients: clients.filter(c => c.status !== 'Inativo').length,
@@ -291,10 +296,15 @@ export default function Dashboard() {
                                         padding: '0 10px', borderRight: '1px solid rgba(255,255,255,0.1)', minWidth: '50px'
                                     }}>
                                         <span style={{ fontSize: '0.7rem', color: 'var(--color-orange)', textTransform: 'uppercase', fontWeight: '700' }}>
-                                            {new Date(meeting.date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')}
+                                            {(() => {
+                                                try {
+                                                    const d = meeting.date ? new Date(meeting.date.substring(0, 10) + 'T12:00:00') : new Date();
+                                                    return d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                                                } catch (e) { return '---'; }
+                                            })()}
                                         </span>
                                         <span style={{ fontSize: '1.1rem', fontWeight: '700' }}>
-                                            {meeting.date.split('-')[2]}
+                                            {meeting.date ? meeting.date.substring(0, 10).split('-')[2] : '--'}
                                         </span>
                                     </div>
                                     <div style={{ flex: 1 }}>
