@@ -74,7 +74,8 @@ const UploadFileModal = ({ onClose, onSave }) => {
                         recipientId: parseInt(meta.recipientId),
                         category: meta.category,
                         notes: meta.notes,
-                        storageKey: storageKey
+                        storageKey: storageKey,
+                        file: fileData // Pass the actual file for Drive upload
                     });
                     onClose();
                 }

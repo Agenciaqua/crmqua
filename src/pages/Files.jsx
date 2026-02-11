@@ -92,7 +92,12 @@ export default function Files() {
                 alert("Erro ao salvar no Google Drive. O arquivo será salvo apenas no banco (sem conteúdo).");
             }
         } else {
-            alert("Atenção: Você não está autenticado com permissão de Drive ou nenhum arquivo foi selecionado.");
+            if (!token) {
+                alert("Token Google não encontrado. Por favor, faça Logout e Login novamente.");
+            } else if (!newFile.file) {
+                // This should not happen with the modal fix, but good for safety
+                alert("Erro interno: Arquivo não recebido do modal.");
+            }
         }
 
         // Save metadata to Database
