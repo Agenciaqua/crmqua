@@ -88,8 +88,9 @@ export default function Files() {
                 const driveData = await driveService.uploadFile(newFile.file, token);
                 driveFileId = driveData.id;
             } catch (error) {
+            } catch (error) {
                 console.error("Erro no upload pro Drive:", error);
-                alert("Erro ao salvar no Google Drive. O arquivo será salvo apenas no banco (sem conteúdo).");
+                alert(`Erro Google Drive: ${error.message} - Relogue para corrigir.`);
             }
         } else {
             if (!token) {
