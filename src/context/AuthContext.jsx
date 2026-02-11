@@ -51,8 +51,13 @@ export const AuthProvider = ({ children }) => {
         return true;
     };
 
-    const loginWithGoogle = async (userInfo) => {
+    const loginWithGoogle = async (userInfo, accessToken) => {
         try {
+            // Save the token for Drive API usage
+            if (accessToken) {
+                localStorage.setItem('qua_google_token', accessToken);
+            }
+
             // Check if user exists by email
             const allUsers = await db.getAll('users');
             let userFound = allUsers.find(u => u.email === userInfo.email);
