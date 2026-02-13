@@ -41,6 +41,28 @@ const sanitize = (table, data) => {
     return validData;
 };
 
+const normalizeResponse = (table, data) => {
+    if (!data) return data;
+    if (Array.isArray(data)) return data.map(item => normalizeResponse(table, item));
+
+    // If no schema, return as is (but try to preserve id/created_at)
+    if (!SCHEMAS[table]) return { ...data };
+
+    const normalized = { ...data }; // Start with original data to keep 'id', 'created_at' etc.
+
+    SCHEMAS[table].forEach(field => {
+        // Check for exact match OR lowercase match
+        const lowerField = field.toLowerCase();
+
+        // If the field is missing but we have it in lowercase, map it
+        if (normalized[field] === undefined && normalized[lowerField] !== undefined) {
+            normalized[field] = normalized[lowerField];
+        }
+    });
+
+    return normalized;
+};
+
 export const db = {
     getAll: async (table) => {
         try {
@@ -49,7 +71,8 @@ export const db = {
                 console.error(`Fetch error ${table}:`, res.statusText);
                 return [];
             }
-            return await res.json();
+            const rawData = await res.json();
+            return normalizeResponse(table, rawData);
         } catch (e) {
             console.error("DB Error:", e);
             return [];
@@ -59,7 +82,8 @@ export const db = {
         try {
             const res = await fetch(`${API_URL}?type=${table}&id=${id}`);
             if (!res.ok) return null;
-            return await res.json();
+            const rawData = await res.json();
+            return normalizeResponse(table, rawData);
         } catch (e) {
             return null;
         }
