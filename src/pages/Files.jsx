@@ -11,14 +11,23 @@ import UploadFileModal from '../components/UploadFileModal';
 const FileViewer = ({ fileKey, fileName, fileType, onClose }) => {
     const [blobUrl, setBlobUrl] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchFile = async () => {
             const token = localStorage.getItem('qua_google_token');
             if (token) {
-                const blob = await driveService.getFile(fileKey, token);
-                if (blob) {
-                    setBlobUrl(URL.createObjectURL(blob));
+                try {
+                    const blob = await driveService.getFile(fileKey, token);
+                    if (blob) {
+                        setBlobUrl(URL.createObjectURL(blob));
+                    }
+                } catch (err) {
+                    if (err.message === 'TokenExpired') {
+                        setError("Sessão do Google Drive expirada. Por favor, faça login novamente.");
+                    } else {
+                        console.error(err);
+                    }
                 }
             }
             setLoading(false);
@@ -41,15 +50,16 @@ const FileViewer = ({ fileKey, fileName, fileType, onClose }) => {
 
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loading ? <div style={{ color: 'white' }}>Carregando arquivo...</div> :
-                    blobUrl ? (
-                        isImage ? <img src={blobUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} alt={fileName} /> :
-                            isPdf ? <iframe src={blobUrl} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} title={fileName} /> :
-                                <div style={{ color: 'white', textAlign: 'center' }}>
-                                    <File size={80} style={{ marginBottom: '20px', opacity: 0.5 }} />
-                                    <h3>Visualização não disponível para este tipo de arquivo ({fileType})</h3>
-                                    <a href={blobUrl} download={fileName} className="btn-primary" style={{ display: 'inline-block', marginTop: '20px', textDecoration: 'none' }}>Baixar para Ver</a>
-                                </div>
-                    ) : <div style={{ color: 'white' }}>Arquivo não encontrado no armazenamento local.</div>
+                    error ? <div style={{ color: '#ff6b6b', textAlign: 'center' }}><h3>{error}</h3></div> :
+                        blobUrl ? (
+                            isImage ? <img src={blobUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} alt={fileName} /> :
+                                isPdf ? <iframe src={blobUrl} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} title={fileName} /> :
+                                    <div style={{ color: 'white', textAlign: 'center' }}>
+                                        <File size={80} style={{ marginBottom: '20px', opacity: 0.5 }} />
+                                        <h3>Visualização não disponível para este tipo de arquivo ({fileType})</h3>
+                                        <a href={blobUrl} download={fileName} className="btn-primary" style={{ display: 'inline-block', marginTop: '20px', textDecoration: 'none' }}>Baixar para Ver</a>
+                                    </div>
+                        ) : <div style={{ color: 'white' }}>Arquivo não encontrado no armazenamento local ou Drive.</div>
                 }
             </div>
         </div>
@@ -89,7 +99,14 @@ export default function Files() {
                 driveFileId = driveData.id;
             } catch (error) {
                 console.error("Erro no upload pro Drive:", error);
+
+                if (error.message === 'TokenExpired' || error.message.includes('TokenExpired')) {
+                    alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente para reconectar.");
+                    return; // Stop execution
+                }
+
                 alert(`Erro Google Drive: ${error.message} - Relogue para corrigir.`);
+                return;
             }
         } else {
             if (!token) {
@@ -132,16 +149,24 @@ export default function Files() {
     const handleDownload = async (file) => {
         const token = localStorage.getItem('qua_google_token');
         if (file.storageKey && token) {
-            const blob = await driveService.getFile(file.storageKey, token);
-            if (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                a.click();
-                URL.revokeObjectURL(url);
-            } else {
-                alert("Erro ao baixar arquivo do Drive.");
+            try {
+                const blob = await driveService.getFile(file.storageKey, token);
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } else {
+                    alert("Erro ao baixar arquivo do Drive.");
+                }
+            } catch (error) {
+                if (error.message === 'TokenExpired') {
+                    alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente.");
+                } else {
+                    alert("Erro ao baixar: " + error.message);
+                }
             }
         } else {
             alert("Arquivo sem vínculo com o Drive ou você precisa relogar para ter acesso.");

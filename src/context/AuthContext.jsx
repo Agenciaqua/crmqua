@@ -93,6 +93,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setUser(null);
         localStorage.removeItem('qua_user_session');
+        localStorage.removeItem('qua_google_token');
     };
 
     const updateProfile = async (updates) => {

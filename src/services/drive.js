@@ -22,9 +22,29 @@ export const driveService = {
             });
 
             if (!response.ok) {
-                const errorBody = await response.text();
-                console.error("Drive API Error Body:", errorBody);
-                throw new Error(`Status: ${response.status} - ${errorBody}`);
+                const errorText = await response.text();
+
+                if (response.status === 401) {
+                    throw new Error("TokenExpired");
+                }
+
+                let errorMessage = `Status: ${response.status}`;
+
+                try {
+                    const errorObj = JSON.parse(errorText);
+                    if (errorObj.error && errorObj.error.message) {
+                        if (errorObj.error.code === 403 && errorObj.error.message.includes('enable it by visiting')) {
+                            errorMessage = "A API do Google Drive não está ativada no seu Projeto Google Cloud. Por favor, ative-a.";
+                        } else {
+                            errorMessage = errorObj.error.message;
+                        }
+                    }
+                } catch (e) {
+                    errorMessage += ` - ${errorText}`;
+                }
+
+                console.error("Drive API Error:", errorText);
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
@@ -44,6 +64,9 @@ export const driveService = {
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error("TokenExpired");
+                }
                 throw new Error('Failed to fetch file from Drive');
             }
 
