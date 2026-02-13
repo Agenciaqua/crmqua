@@ -70,9 +70,8 @@ const UploadFileModal = ({ onClose, onSave }) => {
                         name: fileData.name,
                         type: fileData.name.split('.').pop(),
                         size: formatSize(fileData.size),
-                        size: formatSize(fileData.size),
                         date: new Date().toISOString().split('T')[0], // Fixed for PostgreSQL (YYYY-MM-DD)
-                        recipientId: parseInt(meta.recipientId),
+                        recipientId: meta.recipientId, // Keep as string/value from select to match DB types exactly
                         category: meta.category,
                         notes: meta.notes,
                         storageKey: storageKey,

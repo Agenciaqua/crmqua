@@ -117,6 +117,12 @@ export default function Files() {
             }
         }
 
+        // Validate Drive Upload
+        if (!driveFileId && newFile.file) {
+            alert("Falha no upload para o Google Drive. O arquivo não será salvo no sistema. Verifique seu login/token.");
+            return;
+        }
+
         // Save metadata to Database
         try {
             await db.add('files', {
@@ -139,7 +145,7 @@ export default function Files() {
     };
 
     const getUserName = (id) => {
-        const u = users.find(user => user.id === id);
+        const u = users.find(user => user.id == id);
         return u ? u.name : '-';
     };
 
