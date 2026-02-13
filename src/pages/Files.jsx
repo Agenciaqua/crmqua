@@ -84,6 +84,8 @@ export default function Files() {
             db.getAll('files'),
             db.getAll('users')
         ]);
+        console.log("DEBUG: All Users:", allUsers);
+        console.log("DEBUG: All Files:", allFiles);
         setFiles(allFiles);
         setUsers(allUsers);
     };
@@ -146,6 +148,7 @@ export default function Files() {
 
     const getUserName = (id) => {
         const u = users.find(user => user.id == id);
+        if (!u) console.warn(`DEBUG: User not found for ID: ${id}. Users loaded: ${users.length}`);
         return u ? u.name : '-';
     };
 
@@ -159,28 +162,35 @@ export default function Files() {
 
     const handleDownload = async (file) => {
         const token = localStorage.getItem('qua_google_token');
-        if (file.storageKey && token) {
-            try {
-                const blob = await driveService.getFile(file.storageKey, token);
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = file.name;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                } else {
-                    alert("Erro ao baixar arquivo do Drive.");
-                }
-            } catch (error) {
-                if (error.message === 'TokenExpired') {
-                    alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente.");
-                } else {
-                    alert("Erro ao baixar: " + error.message);
-                }
+
+        if (!token) {
+            alert("Erro: Token de acesso Google não encontrado. Faça Logout e Login novamente.");
+            return;
+        }
+
+        if (!file.storageKey) {
+            alert(`Erro: Este arquivo (${file.name}) não possui vínculo com o Drive (ID nulo).`);
+            return;
+        }
+
+        try {
+            const blob = await driveService.getFile(file.storageKey, token);
+            if (blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+            } else {
+                alert("Erro ao baixar arquivo do Drive (Blob vazio).");
             }
-        } else {
-            alert("Arquivo sem vínculo com o Drive ou você precisa relogar para ter acesso.");
+        } catch (error) {
+            if (error.message === 'TokenExpired') {
+                alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente.");
+            } else {
+                alert("Erro ao baixar: " + error.message);
+            }
         }
     };
 
