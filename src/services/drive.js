@@ -22,7 +22,9 @@ export const driveService = {
             });
 
             if (!response.ok) {
-                throw new Error(`Drive Upload Login Failed: ${response.statusText}`);
+                const errorBody = await response.text();
+                console.error("Drive API Error Body:", errorBody);
+                throw new Error(`Status: ${response.status} - ${errorBody}`);
             }
 
             const data = await response.json();
