@@ -108,26 +108,27 @@ export const driveService = {
             console.error("Share Exception:", error);
             return { success: false, error: error.message };
         }
-        getFileMetadata: async (fileId, accessToken) => {
-            try {
-                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,webViewLink,webContentLink,trashed`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
+    },
+    getFileMetadata: async (fileId, accessToken) => {
+        try {
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,webViewLink,webContentLink,trashed`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error("TokenExpired");
-                    }
-                    const errorText = await response.text();
-                    throw new Error(`Metadata Error (${response.status}): ${errorText}`);
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error("TokenExpired");
                 }
-
-                return await response.json();
-            } catch (error) {
-                console.error("Get Metadata Error:", error);
-                throw error;
+                const errorText = await response.text();
+                throw new Error(`Metadata Error (${response.status}): ${errorText}`);
             }
+
+            return await response.json();
+        } catch (error) {
+            console.error("Get Metadata Error:", error);
+            throw error;
         }
-    };
+    }
+};
