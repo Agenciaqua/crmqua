@@ -206,23 +206,30 @@ export default function Files() {
         }
 
         try {
-            const blob = await driveService.getFile(file.storageKey, token);
-            if (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.name;
-                a.click();
-                URL.revokeObjectURL(url);
-            } else {
-                // This branch might now be unreachable if getFile throws, but keeping as fallback
-                alert("Erro ao baixar arquivo do Drive (Blob vazio/nulo).");
+            alert("Buscando link de download seguro...");
+            // New Strategy: Get the native Drive link
+            const metadata = await driveService.getFileMetadata(file.storageKey, token);
+
+            if (metadata.trashed) {
+                alert("Erro: Este arquivo está na LIXEIRA do Google Drive.");
+                return;
             }
+
+            if (metadata.webContentLink) {
+                // Direct download link
+                window.open(metadata.webContentLink, '_blank');
+            } else if (metadata.webViewLink) {
+                // View link (fallback)
+                window.open(metadata.webViewLink, '_blank');
+            } else {
+                alert("Erro: O Google Drive não retornou um link de download para este arquivo.");
+            }
+
         } catch (error) {
             if (error.message === 'TokenExpired') {
                 alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente.");
             } else {
-                alert("Erro ao baixar do Drive: " + error.message);
+                alert("Erro ao preparar download: " + error.message);
             }
         }
     };
