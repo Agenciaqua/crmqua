@@ -123,6 +123,19 @@ export default function Files() {
             return;
         }
 
+        // Share file with recipient if applicable
+        if (driveFileId && newFile.recipientId) {
+            const recipient = users.find(u => u.id == newFile.recipientId);
+            if (recipient && recipient.email) {
+                try {
+                    await driveService.shareFile(driveFileId, recipient.email, token);
+                } catch (shareErr) {
+                    console.warn("Falha ao compartilhar arquivo:", shareErr);
+                    // Non-blocking, but good to know
+                }
+            }
+        }
+
         // Save metadata to Database
         try {
             await db.add('files', {
@@ -180,13 +193,14 @@ export default function Files() {
                 a.click();
                 URL.revokeObjectURL(url);
             } else {
-                alert("Erro ao baixar arquivo do Drive (Blob vazio).");
+                // This branch might now be unreachable if getFile throws, but keeping as fallback
+                alert("Erro ao baixar arquivo do Drive (Blob vazio/nulo).");
             }
         } catch (error) {
             if (error.message === 'TokenExpired') {
                 alert("Sua sessão do Google Drive expirou. Por favor, faça Logout e Login novamente.");
             } else {
-                alert("Erro ao baixar: " + error.message);
+                alert("Erro ao baixar do Drive: " + error.message);
             }
         }
     };

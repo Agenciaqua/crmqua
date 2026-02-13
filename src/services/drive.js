@@ -73,13 +73,43 @@ export const driveService = {
                 if (response.status === 401) {
                     throw new Error("TokenExpired");
                 }
-                throw new Error('Failed to fetch file from Drive');
+                const errorText = await response.text();
+                throw new Error(`Drive Error (${response.status}): ${errorText}`);
             }
 
             return await response.blob();
         } catch (error) {
             console.error('Drive Fetch Error:', error);
-            return null;
+            throw error; // Propagate error instead of returning null
+        }
+    },
+
+    shareFile: async (fileId, email, accessToken) => {
+        try {
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    role: 'reader',
+                    type: 'user',
+                    emailAddress: email,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Share Error:", errorText);
+                // We don't throw here to avoid blocking the main flow, but we log it.
+                // Or maybe we should warn?
+                return false;
+            }
+            return true;
+        } catch (error) {
+            console.error("Share Exception:", error);
+            return false;
         }
     }
 };
