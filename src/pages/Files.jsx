@@ -177,6 +177,41 @@ export default function Files() {
         }
     };
 
+    const handleFixPermissions = async (file) => {
+        const token = localStorage.getItem('qua_google_token');
+        if (!token) {
+            alert("Erro: Token não encontrado. Faça login novamente.");
+            return;
+        }
+
+        if (!file.recipientId) {
+            alert("Este arquivo não tem um destinatário definido para compartilhar.");
+            return;
+        }
+
+        const recipient = users.find(u => u.id == file.recipientId);
+        if (!recipient || !recipient.email) {
+            alert("Erro: Destinatário não encontrado ou sem email cadastrado.");
+            return;
+        }
+
+        const confirmFix = window.confirm(`Tentar liberar acesso manualmente para ${recipient.name} (${recipient.email})?`);
+        if (!confirmFix) return;
+
+        try {
+            alert(`Tentando compartilhar arquivo ID: ${file.storageKey} com ${recipient.email}...`);
+            const result = await driveService.shareFile(file.storageKey, recipient.email, token);
+
+            if (result.success) {
+                alert("✅ SUCESSO! A permissão foi adicionada. Peça para o destinatário tentar baixar agora.");
+            } else {
+                alert(`❌ ERRO ao compartilhar: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`❌ ERRO CRÍTICO: ${error.message}`);
+        }
+    };
+
     const handleDownload = async (file) => {
         const token = localStorage.getItem('qua_google_token');
 
@@ -283,6 +318,7 @@ export default function Files() {
                                 <td style={{ padding: '20px 30px', textAlign: 'right' }}>
                                     {file.storageKey && <button onClick={() => setViewingFile(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Visualizar"><Eye size={20} color="#ccc" /></button>}
                                     <button onClick={() => handleDownload(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Baixar"><Download size={20} color="#ccc" /></button>
+                                    <button onClick={() => handleFixPermissions(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Corrigir Acesso (Compartilhar)"><Upload size={20} color="#4CAF50" /></button>
                                     <button onClick={() => handleDelete(file)} className="btn-ghost" style={{ padding: '10px' }} title="Excluir"><Trash2 size={20} color="#ff4d4d" /></button>
                                 </td>
                             </tr>
