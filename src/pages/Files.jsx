@@ -88,7 +88,6 @@ export default function Files() {
                 const driveData = await driveService.uploadFile(newFile.file, token);
                 driveFileId = driveData.id;
             } catch (error) {
-            } catch (error) {
                 console.error("Erro no upload pro Drive:", error);
                 alert(`Erro Google Drive: ${error.message} - Relogue para corrigir.`);
             }

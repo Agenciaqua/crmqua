@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF4500', fontWeight: 'bold', border: '1px solid #FF4500', padding: '5px', borderRadius: '5px' }}>v0.4.7 (Debug Mode)</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#00FFFF', fontWeight: 'bold', border: '1px solid #00FFFF', padding: '5px', borderRadius: '5px' }}>v0.4.9 (Final Upload Fix)</p>
                 </div>
             </div>
         </div>
