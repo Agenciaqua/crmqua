@@ -128,11 +128,18 @@ export default function Files() {
             const recipient = users.find(u => u.id == newFile.recipientId);
             if (recipient && recipient.email) {
                 try {
-                    await driveService.shareFile(driveFileId, recipient.email, token);
+                    const shareResult = await driveService.shareFile(driveFileId, recipient.email, token);
+                    if (shareResult.success) {
+                        alert(`Arquivo compartilhado com sucesso com ${recipient.name} (${recipient.email})!`);
+                    } else {
+                        alert(`Atenção: Upload concluído, mas FALHA ao compartilhar com ${recipient.name}. Erro: ${shareResult.error}`);
+                    }
                 } catch (shareErr) {
                     console.warn("Falha ao compartilhar arquivo:", shareErr);
-                    // Non-blocking, but good to know
+                    alert("Erro crítico ao tentar compartilhar: " + shareErr.message);
                 }
+            } else {
+                alert("Aviso: Destinatário não possui email cadastrado. O arquivo foi salvo, mas ele pode não conseguir acessar.");
             }
         }
 

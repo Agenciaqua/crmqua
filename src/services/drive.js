@@ -102,14 +102,12 @@ export const driveService = {
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Share Error:", errorText);
-                // We don't throw here to avoid blocking the main flow, but we log it.
-                // Or maybe we should warn?
-                return false;
+                return { success: false, error: errorText };
             }
-            return true;
+            return { success: true };
         } catch (error) {
             console.error("Share Exception:", error);
-            return false;
+            return { success: false, error: error.message };
         }
     }
 };
