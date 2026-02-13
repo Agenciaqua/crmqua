@@ -94,8 +94,7 @@ export const driveService = {
                 },
                 body: JSON.stringify({
                     role: 'reader',
-                    type: 'user',
-                    emailAddress: email,
+                    type: 'anyone',
                 }),
             });
 

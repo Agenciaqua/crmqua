@@ -123,23 +123,13 @@ export default function Files() {
             return;
         }
 
-        // Share file with recipient if applicable
-        if (driveFileId && newFile.recipientId) {
-            const recipient = users.find(u => u.id == newFile.recipientId);
-            if (recipient && recipient.email) {
-                try {
-                    const shareResult = await driveService.shareFile(driveFileId, recipient.email, token);
-                    if (shareResult.success) {
-                        alert(`Arquivo compartilhado com sucesso com ${recipient.name} (${recipient.email})!`);
-                    } else {
-                        alert(`Atenção: Upload concluído, mas FALHA ao compartilhar com ${recipient.name}. Erro: ${shareResult.error}`);
-                    }
-                } catch (shareErr) {
-                    console.warn("Falha ao compartilhar arquivo:", shareErr);
-                    alert("Erro crítico ao tentar compartilhar: " + shareErr.message);
-                }
-            } else {
-                alert("Aviso: Destinatário não possui email cadastrado. O arquivo foi salvo, mas ele pode não conseguir acessar.");
+        // Automatically make file accessible to anyone with the link
+        if (driveFileId) {
+            try {
+                // We don't need a specific recipient email anymore, just make it accessible
+                await driveService.shareFile(driveFileId, null, token);
+            } catch (shareErr) {
+                console.warn("Falha ao tornar arquivo público:", shareErr);
             }
         }
 
@@ -184,28 +174,18 @@ export default function Files() {
             return;
         }
 
-        if (!file.recipientId) {
-            alert("Este arquivo não tem um destinatário definido para compartilhar.");
-            return;
-        }
-
-        const recipient = users.find(u => u.id == file.recipientId);
-        if (!recipient || !recipient.email) {
-            alert("Erro: Destinatário não encontrado ou sem email cadastrado.");
-            return;
-        }
-
-        const confirmFix = window.confirm(`Tentar liberar acesso manualmente para ${recipient.name} (${recipient.email})?`);
+        const confirmFix = window.confirm(`Gerar Link Público para "${file.name}"?\n(Isso resolve o erro 404 para qualquer pessoa com o link)`);
         if (!confirmFix) return;
 
         try {
-            alert(`Tentando compartilhar arquivo ID: ${file.storageKey} com ${recipient.email}...`);
-            const result = await driveService.shareFile(file.storageKey, recipient.email, token);
+            alert(`Liberando acesso geral para o arquivo...`);
+            // Pass null for email since we changed drive.js to ignore it for 'anyone' type
+            const result = await driveService.shareFile(file.storageKey, null, token);
 
             if (result.success) {
-                alert("✅ SUCESSO! A permissão foi adicionada. Peça para o destinatário tentar baixar agora.");
+                alert("✅ SUCESSO! Arquivo liberado. Agora QUALQUER pessoa com o link poderá baixar.");
             } else {
-                alert(`❌ ERRO ao compartilhar: ${result.error}`);
+                alert(`❌ ERRO: ${result.error}`);
             }
         } catch (error) {
             alert(`❌ ERRO CRÍTICO: ${error.message}`);
@@ -318,7 +298,7 @@ export default function Files() {
                                 <td style={{ padding: '20px 30px', textAlign: 'right' }}>
                                     {file.storageKey && <button onClick={() => setViewingFile(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Visualizar"><Eye size={20} color="#ccc" /></button>}
                                     <button onClick={() => handleDownload(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Baixar"><Download size={20} color="#ccc" /></button>
-                                    <button onClick={() => handleFixPermissions(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Corrigir Acesso (Compartilhar)"><Upload size={20} color="#4CAF50" /></button>
+                                    <button onClick={() => handleFixPermissions(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Liberar Acesso Público (Resolver 404)"><Upload size={20} color="#4CAF50" /></button>
                                     <button onClick={() => handleDelete(file)} className="btn-ghost" style={{ padding: '10px' }} title="Excluir"><Trash2 size={20} color="#ff4d4d" /></button>
                                 </td>
                             </tr>
