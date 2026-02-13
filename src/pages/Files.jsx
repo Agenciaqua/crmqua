@@ -278,7 +278,10 @@ export default function Files() {
 
             {/* DEBUG SECTION - REMOVE AFTER FIX */}
             <div style={{ marginTop: '50px', padding: '20px', background: 'rgba(0,0,0,0.5)', border: '1px solid red', borderRadius: '10px' }}>
-                <h3 style={{ color: 'red' }}>DEBUG AREA (Tire print disso se der erro)</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <h3 style={{ color: 'red' }}>DEBUG AREA v2.0 (Normalização Ativa)</h3>
+                    <button onClick={refreshFiles} style={{ padding: '5px' }}>Forçar Recarregamento</button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '10px', overflow: 'auto' }}>
                     <div>
                         <h4 style={{ color: '#aaa' }}>Usuários Carregados ({users.length}):</h4>
