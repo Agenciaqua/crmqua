@@ -33,14 +33,20 @@ export const driveService = {
                 try {
                     const errorObj = JSON.parse(errorText);
                     if (errorObj.error && errorObj.error.message) {
-                        if (errorObj.error.code === 403 && errorObj.error.message.includes('enable it by visiting')) {
-                            errorMessage = "A API do Google Drive não está ativada no seu Projeto Google Cloud. Por favor, ative-a.";
+                        const msg = errorObj.error.message;
+                        if (msg.includes('enable it by visiting') || msg.includes('API has not been used')) {
+                            errorMessage = "A API do Google Drive não está ativada no seu Projeto Google Cloud. Por favor, ative-a: console.developers.google.com/apis/api/drive.googleapis.com";
                         } else {
-                            errorMessage = errorObj.error.message;
+                            errorMessage = msg;
                         }
                     }
                 } catch (e) {
-                    errorMessage += ` - ${errorText}`;
+                    // Fallback check on raw text
+                    if (errorText.includes('enable it by visiting') || errorText.includes('API has not been used')) {
+                        errorMessage = "A API do Google Drive não está ativada no seu Projeto Google Cloud. Por favor, ative-a: console.developers.google.com/apis/api/drive.googleapis.com";
+                    } else {
+                        errorMessage += ` - ${errorText}`;
+                    }
                 }
 
                 console.error("Drive API Error:", errorText);
