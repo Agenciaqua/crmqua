@@ -259,7 +259,7 @@ export default function Files() {
                                 <td style={{ padding: '20px 30px', color: '#CCC', fontSize: '0.9rem' }}>{file.size}</td>
                                 <td style={{ padding: '20px 30px' }}>
                                     <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>
-                                        {getUserName(file.recipientId)}
+                                        {getUserName(file.recipientId)} <span style={{ fontSize: '9px', color: '#555' }}>({file.recipientId})</span>
                                     </span>
                                 </td>
                                 <td style={{ padding: '20px 30px', textAlign: 'right' }}>
@@ -275,6 +275,25 @@ export default function Files() {
 
             {isUploadModalOpen && <UploadFileModal onClose={() => setIsUploadModalOpen(false)} onSave={handleFileUpload} />}
             {viewingFile && <FileViewer fileKey={viewingFile.storageKey} fileName={viewingFile.name} fileType={viewingFile.type} onClose={() => setViewingFile(null)} />}
+
+            {/* DEBUG SECTION - REMOVE AFTER FIX */}
+            <div style={{ marginTop: '50px', padding: '20px', background: 'rgba(0,0,0,0.5)', border: '1px solid red', borderRadius: '10px' }}>
+                <h3 style={{ color: 'red' }}>DEBUG AREA (Tire print disso se der erro)</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '10px', overflow: 'auto' }}>
+                    <div>
+                        <h4 style={{ color: '#aaa' }}>Usuários Carregados ({users.length}):</h4>
+                        <pre style={{ height: '200px', overflow: 'auto', background: '#111', padding: '10px' }}>
+                            {JSON.stringify(users, null, 2)}
+                        </pre>
+                    </div>
+                    <div>
+                        <h4 style={{ color: '#aaa' }}>Arquivos Recentes ({files.length}):</h4>
+                        <pre style={{ height: '200px', overflow: 'auto', background: '#111', padding: '10px' }}>
+                            {JSON.stringify(files.slice(0, 5).map(f => ({ name: f.name, recipientId: f.recipientId, storageKey: f.storageKey })), null, 2)}
+                        </pre>
+                    </div>
+                </div>
+            </div>
         </Layout>
     );
 }
