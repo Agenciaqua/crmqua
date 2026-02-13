@@ -103,7 +103,8 @@ export const db = {
                 throw new Error(`DB Error: ${errText}`);
             }
 
-            return await res.json();
+            const rawData = await res.json();
+            return normalizeResponse(table, rawData);
         } catch (e) {
             console.error("DB Add Error:", e);
             throw e; // Propagate error to caller
@@ -118,7 +119,8 @@ export const db = {
                 body: JSON.stringify(cleanUpdates)
             });
             if (!res.ok) throw new Error("Update failed");
-            return await res.json();
+            const rawData = await res.json();
+            return normalizeResponse(table, rawData);
         } catch (e) {
             console.error("DB Update Error:", e);
             return null;
