@@ -72,11 +72,17 @@ export const db = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(cleanItem)
             });
-            if (!res.ok) throw new Error("Add failed");
+
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error(`DB Add Failed (${res.status}):`, errText);
+                throw new Error(`DB Error: ${errText}`);
+            }
+
             return await res.json();
         } catch (e) {
             console.error("DB Add Error:", e);
-            return null;
+            throw e; // Propagate error to caller
         }
     },
     update: async (table, id, updates) => {

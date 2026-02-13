@@ -118,12 +118,17 @@ export default function Files() {
         }
 
         // Save metadata to Database
-        await db.add('files', {
-            ...newFile,
-            storageKey: driveFileId, // Now stores Drive ID instead of local key
-            ownerId: user.id
-        });
-        refreshFiles();
+        try {
+            await db.add('files', {
+                ...newFile,
+                storageKey: driveFileId, // Now stores Drive ID instead of local key
+                ownerId: user.id
+            });
+            refreshFiles();
+        } catch (dbError) {
+            console.error("Failed to save file metadata:", dbError);
+            alert("Erro ao salvar registro do arquivo no sistema: " + dbError.message);
+        }
     };
 
     const getIcon = (type) => {
