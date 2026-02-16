@@ -72,10 +72,8 @@ export const AuthProvider = ({ children }) => {
                     createdAt: new Date().toLocaleDateString('pt-BR')
                 };
                 // Add directly to DB
-                await db.add('users', newUser);
-                // Fetch again to get ID
-                const updatedUsers = await db.getAll('users');
-                userFound = updatedUsers.find(u => u.email === userInfo.email);
+                // Add directly to DB and get the result immediately
+                userFound = await db.add('users', newUser);
             }
 
             if (userFound) {
