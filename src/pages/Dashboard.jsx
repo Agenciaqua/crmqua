@@ -145,12 +145,16 @@ export default function Dashboard() {
             // Helper to normalize any date format to YYYY-MM-DD
             const normalizeDate = (dateStr) => {
                 if (!dateStr) return null;
-                // If already YYYY-MM-DD
+                // If already YYYY-MM-DD (ISO)
                 if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-                // If DD/MM/YYYY
+                // If DD/MM/YYYY (Legacy)
                 if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
                     const [d, m, y] = dateStr.split('/');
                     return `${y}-${m}-${d}`;
+                }
+                // If ISO with time (YYYY-MM-DDTHH:mm:ss...)
+                if (dateStr.includes('T')) {
+                    return dateStr.split('T')[0];
                 }
                 return null;
             };
@@ -159,20 +163,27 @@ export default function Dashboard() {
                 const d = new Date(startOfWeek);
                 d.setDate(startOfWeek.getDate() + i);
 
-                // Use Local ISO String for target date (matches Prospecting save format)
+                // Target date in Local ISO format (YYYY-MM-DD)
                 const targetDate = d.toLocaleDateString('en-CA');
 
-                // Count where interaction happened on this day
-                // Logic updated: Only count LEADS (not clients)
+                // Count where interaction happened on this specific day
                 const count = clients.filter(c => {
                     if (!c.lastInteraction) return false;
 
-                    // Strict filter: Must be a Lead
-                    const isLead = c.relationship === 'Lead' || !c.relationship;
-
-                    // Normalize stored date to YYYY-MM-DD and compare
+                    // Normalize stored date to YYYY-MM-DD
                     const clientDate = normalizeDate(c.lastInteraction);
+
+                    // improved debugging
+                    // console.log(`Checking ${c.name}: ${clientDate} vs ${targetDate}`);
+
                     const matchesDate = clientDate === targetDate;
+
+                    // Filter: Must be a Lead (or undefined) AND have interaction on this date
+                    // We include 'Lead' and null/undefined relationships. 
+                    // We EXCLUDE 'Cliente' to strictly follow "Leads Contacted" logic, 
+                    // unless the user wants to see *all* contacts. 
+                    // Given the request "apenas para leads", we keep this filter.
+                    const isLead = c.relationship === 'Lead' || !c.relationship;
 
                     return isLead &&
                         matchesDate &&
