@@ -168,22 +168,30 @@ export default function Dashboard() {
 
                 // Count where interaction happened on this specific day
                 const count = clients.filter(c => {
-                    if (!c.lastInteraction) return false;
-
-                    // Normalize stored date to YYYY-MM-DD
                     const clientDate = normalizeDate(c.lastInteraction);
-
-                    // improved debugging
-                    // console.log(`Checking ${c.name}: ${clientDate} vs ${targetDate}`);
-
                     const matchesDate = clientDate === targetDate;
-
-                    // Filter: Must be a Lead (or undefined) AND have interaction on this date
-                    // We include 'Lead' and null/undefined relationships. 
-                    // We EXCLUDE 'Cliente' to strictly follow "Leads Contacted" logic, 
-                    // unless the user wants to see *all* contacts. 
-                    // Given the request "apenas para leads", we keep this filter.
                     const isLead = c.relationship === 'Lead' || !c.relationship;
+
+                    // DEBUG LOGGING
+                    if (c.lastInteraction && matchesDate) {
+                        console.log(`✅ MATCH FOUND for ${targetDate}:`, {
+                            name: c.name,
+                            storedDate: c.lastInteraction,
+                            normalized: clientDate,
+                            relationship: c.relationship,
+                            isLead: isLead,
+                            status: c.status
+                        });
+                    } else if (c.lastInteraction && c.lastInteraction.includes(targetDate)) {
+                        console.log(`⚠️ PARTIAL MATCH (Failed Filter) for ${targetDate}:`, {
+                            name: c.name,
+                            storedDate: c.lastInteraction,
+                            normalized: clientDate,
+                            relationship: c.relationship,
+                            isLead: isLead,
+                            status: c.status
+                        });
+                    }
 
                     return isLead &&
                         matchesDate &&
@@ -193,6 +201,8 @@ export default function Dashboard() {
 
                 weekData.push({ name: days[i], leads: count });
             }
+
+            console.log("📊 FINAL CHART DATA:", weekData);
             setChartData(weekData);
         } catch (e) {
             console.error("Dashboard Load Error:", e);
