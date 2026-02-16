@@ -166,50 +166,24 @@ export default function Dashboard() {
                 // Target date in Local ISO format (YYYY-MM-DD)
                 const targetDate = d.toLocaleDateString('en-CA');
 
-                // Count where interaction happened on this specific day
                 let ignoredCount = 0;
 
                 const count = clients.filter(c => {
                     const clientDate = normalizeDate(c.lastInteraction);
                     const matchesDate = clientDate === targetDate;
+                    // Filter: Must be a Lead (or undefined) AND have interaction on this date
                     const isLead = c.relationship === 'Lead' || !c.relationship;
                     const isActive = c.status !== 'Inativo' && c.status !== 'Arquivado';
 
-                    if (matchesDate && (!isLead || !isActive)) {
-                        ignoredCount++;
-                        console.warn(`🚫 IGNORED MATCH for ${targetDate}:`, c.name, c.relationship, c.status);
-                    }
-
-                    // DEBUG LOGGING
-                    if (c.lastInteraction && matchesDate) {
-                        console.log(`✅ MATCH FOUND for ${targetDate}:`, {
-                            name: c.name,
-                            storedDate: c.lastInteraction,
-                            normalized: clientDate,
-                            relationship: c.relationship,
-                            isLead: isLead,
-                            status: c.status
-                        });
-                    } else if (c.lastInteraction && c.lastInteraction.includes(targetDate)) {
-                        console.log(`⚠️ PARTIAL MATCH (Failed Filter) for ${targetDate}:`, {
-                            name: c.name,
-                            storedDate: c.lastInteraction,
-                            normalized: clientDate,
-                            relationship: c.relationship,
-                            isLead: isLead,
-                            status: c.status
-                        });
-                    }
-
+                    // Strict filter: lead matching date and active status
                     return isLead &&
                         matchesDate &&
                         isActive;
                 }).length;
 
-                weekData.push({ name: days[i], leads: count, ignored: ignoredCount });
+                weekData.push({ name: days[i], leads: count });
             }
 
-            console.log("📊 FINAL CHART DATA:", weekData);
             setChartData(weekData);
         } catch (e) {
             console.error("Dashboard Load Error:", e);
@@ -472,25 +446,6 @@ export default function Dashboard() {
             </div>
 
             {isClientModalOpen && <AddClientModal onClose={() => setIsClientModalOpen(false)} onSave={handleAddClient} />}
-
-            {/* DEBUG PANEL - REMOVE AFTER FIX */}
-            <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #333', borderRadius: '8px', background: '#111', color: '#0f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                <h4>🕵️ DEBUG CHART DATA - V2</h4>
-                <p>Clients Loaded: {recentClients.length}</p>
-                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                    {chartData.map(d => (
-                        <div key={d.name} style={{ display: 'flex', gap: '15px', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: 'bold' }}>{d.name}:</span>
-                            <span style={{ color: '#fff' }}>Leads: {d.leads}</span>
-                            {d.ignored > 0 && <span style={{ color: 'orange' }}>Ignored: {d.ignored}</span>}
-                        </div>
-                    ))}
-                </div>
-                <hr style={{ borderColor: '#333', margin: '10px 0' }} />
-                <p style={{ fontSize: '0.75rem', color: '#888' }}>
-                    If "Ignored" &gt; 0, it means interactions exist but are hidden due to Status (Inativo/Arquivado) or Relationship (Cliente).
-                </p>
-            </div>
         </Layout>
     );
 }
