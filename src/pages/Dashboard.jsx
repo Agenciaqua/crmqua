@@ -142,23 +142,37 @@ export default function Dashboard() {
             const weekData = [];
             const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
+            // Helper to normalize any date format to YYYY-MM-DD
+            const normalizeDate = (dateStr) => {
+                if (!dateStr) return null;
+                // If already YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+                // If DD/MM/YYYY
+                if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+                    const [d, m, y] = dateStr.split('/');
+                    return `${y}-${m}-${d}`;
+                }
+                return null;
+            };
+
             for (let i = 0; i < 7; i++) {
                 const d = new Date(startOfWeek);
                 d.setDate(startOfWeek.getDate() + i);
 
-                // Formats for comparison
-                const dateISO = d.toISOString().split('T')[0]; // YYYY-MM-DD (New Standard)
-                const datePT = d.toLocaleDateString('pt-BR'); // DD/MM/YYYY (Legacy)
+                // Use Local ISO String for target date (matches Prospecting save format)
+                const targetDate = d.toLocaleDateString('en-CA');
 
                 // Count where interaction happened on this day
                 // Logic updated: Only count LEADS (not clients)
                 const count = clients.filter(c => {
                     if (!c.lastInteraction) return false;
-                    // Strict filter: Must be a Lead (or undefined relationship treated as Lead)
+
+                    // Strict filter: Must be a Lead
                     const isLead = c.relationship === 'Lead' || !c.relationship;
 
-                    // Match either format to support old and new data
-                    const matchesDate = c.lastInteraction === dateISO || c.lastInteraction === datePT;
+                    // Normalize stored date to YYYY-MM-DD and compare
+                    const clientDate = normalizeDate(c.lastInteraction);
+                    const matchesDate = clientDate === targetDate;
 
                     return isLead &&
                         matchesDate &&

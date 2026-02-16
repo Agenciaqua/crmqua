@@ -65,7 +65,8 @@ const Prospecting = () => {
     const handleContacted = async (lead) => {
         if (window.confirm(`Marcar ${lead.name} como contactado?`)) {
             try {
-                const todayISO = new Date().toISOString().split('T')[0];
+                // Use Local ISO String (YYYY-MM-DD) to avoid UTC shifts
+                const todayISO = new Date().toLocaleDateString('en-CA');
                 await db.update('clients', lead.id, {
                     status: 'Fazer Follow up', // Update status to reflect next step
                     relationship: 'Lead', // Ensure it stays in Lead tab
