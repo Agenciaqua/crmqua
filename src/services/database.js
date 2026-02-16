@@ -16,7 +16,7 @@ const SCHEMAS = {
     ],
     meetings: [
         'title', 'clientId', 'date', 'time', 'duration', 'type',
-        'notes', 'status', 'ownerId'
+        'notes', 'status', 'ownerId', 'assigneeId'
     ],
     files: [
         'name', 'type', 'size', 'date', 'ownerId', 'recipientId',

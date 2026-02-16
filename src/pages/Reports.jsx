@@ -82,8 +82,13 @@ export default function Reports() {
         const tasksInRange = rawData.tasks.filter(t => isWithinRange(t.dueDate) && checkOwner(t, 'assigneeId'));
         const tasksCompleted = tasksInRange.filter(t => t.status === 'Concluída' || t.status === 'done').length;
 
-        // Meetings (ownerId)
-        const meetingsInRange = rawData.meetings.filter(m => isWithinRange(m.date) && checkOwner(m, 'ownerId'));
+        // Meetings (assigneeId OR ownerId) - If user is selected, check if they are the assignee (host) or owner (creator)
+        // Ideally reports usually track "Who performed the meeting", so assigneeId is priority.
+        const checkMeetingOwner = (m) => {
+            if (!selectedUser) return true;
+            return String(m.assigneeId) === String(selectedUser) || String(m.ownerId) === String(selectedUser);
+        };
+        const meetingsInRange = rawData.meetings.filter(m => isWithinRange(m.date) && checkMeetingOwner(m));
         const meetingsDone = meetingsInRange.filter(m => m.status === 'Realizada').length;
 
         // Clients (ownerId)

@@ -18,13 +18,18 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
     });
 
     const [clients, setClients] = useState([]);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
-        const loadClients = async () => {
-            const allClients = await db.getAll('clients');
+        const loadData = async () => {
+            const [allClients, allUsers] = await Promise.all([
+                db.getAll('clients'),
+                db.getAll('users')
+            ]);
             setClients(allClients);
+            setUsers(allUsers);
         };
-        loadClients();
+        loadData();
 
         if (initialData) {
             setMeeting(initialData);
@@ -70,6 +75,18 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
                                 {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
+                        <div>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#AAA', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                <User size={14} /> Responsável (Quem vai?)
+                            </label>
+                            <select required value={meeting.assigneeId || ''} onChange={e => setMeeting({ ...meeting, assigneeId: e.target.value })} style={{ width: '100%' }}>
+                                <option value="">Selecione...</option>
+                                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
                         <div>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#AAA', marginBottom: '8px', fontSize: '0.9rem' }}>
                                 <Tag size={14} /> Tipo de Reunião

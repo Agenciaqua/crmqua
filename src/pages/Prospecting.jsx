@@ -186,6 +186,15 @@ const Prospecting = () => {
                                                     Origem: {lead.source}
                                                 </div>
                                             )}
+                                            {lead.lastInteraction && (
+                                                <div style={{ fontSize: '0.65rem', color: '#666', marginTop: '4px', fontStyle: 'italic' }}>
+                                                    {(() => {
+                                                        const cleanDate = lead.lastInteraction.substring(0, 10);
+                                                        const [y, m, d] = cleanDate.split('-');
+                                                        return d && m && y && y.length === 4 ? `${d}/${m}/${y}` : lead.lastInteraction;
+                                                    })()}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
