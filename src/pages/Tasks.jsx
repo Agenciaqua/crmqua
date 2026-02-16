@@ -31,7 +31,9 @@ const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        const [year, month, day] = dateString.split('-');
+        // Handle ISO strings (e.g. 2026-02-16T00:00:00.000Z)
+        const cleanDate = dateString.substring(0, 10);
+        const [year, month, day] = cleanDate.split('-');
         return `${day}/${month}/${year}`;
     };
 

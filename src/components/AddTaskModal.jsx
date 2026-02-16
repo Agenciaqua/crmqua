@@ -28,6 +28,8 @@ const AddTaskModal = ({ onClose, onSave, initialData }) => {
             setTask({
                 ...initialData,
                 assigneeId: initialData.assigneeId || '',
+                // Ensure date format is YYYY-MM-DD for input type="date"
+                dueDate: initialData.dueDate ? initialData.dueDate.substring(0, 10) : ''
             });
         }
     }, [initialData]);
