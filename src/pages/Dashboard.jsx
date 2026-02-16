@@ -64,7 +64,7 @@ const QuickAction = ({ icon: Icon, label, onClick }) => (
 export default function Dashboard() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [stats, setStats] = useState({ clients: 0, pendingTasks: 0, meetings: 0 });
+    const [stats, setStats] = useState({ activeClients: 0, activeLeads: 0, pendingTasks: 0, meetings: 0 });
     const [recentClients, setRecentClients] = useState([]);
     const [todaysTasks, setTodaysTasks] = useState([]);
     const [upcomingMeetings, setUpcomingMeetings] = useState([]);
@@ -119,8 +119,12 @@ export default function Dashboard() {
                     return (da + a.time).localeCompare(db + b.time);
                 });
 
+            const activeClientsCount = clients.filter(c => c.relationship === 'Cliente' && c.status !== 'Inativo').length;
+            const activeLeadsCount = clients.filter(c => (c.relationship === 'Lead' || !c.relationship) && c.status !== 'Inativo').length;
+
             setStats({
-                clients: clients.filter(c => c.status !== 'Inativo').length,
+                activeClients: activeClientsCount,
+                activeLeads: activeLeadsCount,
                 pendingTasks: tasks.filter(t => t.status === 'todo' || t.status === 'inprogress').length,
                 meetings: futureMeetings.length
             });
@@ -144,11 +148,14 @@ export default function Dashboard() {
                 const dateStrPT = d.toLocaleDateString('pt-BR'); // DD/MM/YYYY matching client.lastInteraction
 
                 // Count where interaction happened on this day
-                // Logic updated: Any active client with interaction on this date is considered "Contacted"
-                // Normalize dates to prevent mismatch (e.g. 01/01/2024 vs 1/1/2024)
+                // Logic updated: Only count LEADS (not clients)
                 const count = clients.filter(c => {
                     if (!c.lastInteraction) return false;
-                    return c.lastInteraction === dateStrPT &&
+                    // Strict filter: Must be a Lead (or undefined relationship treated as Lead)
+                    const isLead = c.relationship === 'Lead' || !c.relationship;
+
+                    return isLead &&
+                        c.lastInteraction === dateStrPT &&
                         c.status !== 'Inativo' &&
                         c.status !== 'Arquivado';
                 }).length;
@@ -229,9 +236,10 @@ export default function Dashboard() {
             </section>
 
             <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', flexWrap: 'wrap' }}>
-                <StatCard title="Leads Ativos" value={stats.clients} change="+12%" icon={Users} />
+                <StatCard title="Leads Ativos" value={stats.activeLeads} change="Prospecção" icon={Users} />
+                <StatCard title="Clientes Ativos" value={stats.activeClients} change="Carteira" icon={DollarSign} />
                 <StatCard title="Reuniões Agendadas" value={stats.meetings} change="Futuras" icon={Calendar} />
-                <StatCard title="Tarefas Pendentes" value={stats.pendingTasks} change="-5%" icon={CheckCircle} />
+                <StatCard title="Tarefas Pendentes" value={stats.pendingTasks} change="Fazer" icon={CheckCircle} />
             </div>
 
             <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'start' }}>
