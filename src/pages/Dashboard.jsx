@@ -145,7 +145,10 @@ export default function Dashboard() {
             for (let i = 0; i < 7; i++) {
                 const d = new Date(startOfWeek);
                 d.setDate(startOfWeek.getDate() + i);
-                const dateStrPT = d.toLocaleDateString('pt-BR'); // DD/MM/YYYY matching client.lastInteraction
+
+                // Formats for comparison
+                const dateISO = d.toISOString().split('T')[0]; // YYYY-MM-DD (New Standard)
+                const datePT = d.toLocaleDateString('pt-BR'); // DD/MM/YYYY (Legacy)
 
                 // Count where interaction happened on this day
                 // Logic updated: Only count LEADS (not clients)
@@ -154,8 +157,11 @@ export default function Dashboard() {
                     // Strict filter: Must be a Lead (or undefined relationship treated as Lead)
                     const isLead = c.relationship === 'Lead' || !c.relationship;
 
+                    // Match either format to support old and new data
+                    const matchesDate = c.lastInteraction === dateISO || c.lastInteraction === datePT;
+
                     return isLead &&
-                        c.lastInteraction === dateStrPT &&
+                        matchesDate &&
                         c.status !== 'Inativo' &&
                         c.status !== 'Arquivado';
                 }).length;
