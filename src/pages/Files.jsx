@@ -138,6 +138,8 @@ export default function Files() {
             await db.add('files', {
                 ...newFile,
                 storageKey: driveFileId, // Now stores Drive ID instead of local key
+                webContentLink: driveData.webContentLink, // For direct download
+                webViewLink: driveData.webViewLink, // For viewing
                 ownerId: user.id
             });
             refreshFiles();
@@ -282,9 +284,20 @@ export default function Files() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '20px 30px', textAlign: 'right' }}>
-                                    {file.storageKey && <button onClick={() => setViewingFile(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Visualizar"><Eye size={20} color="#ccc" /></button>}
-                                    <button onClick={() => handleDownload(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Baixar"><Download size={20} color="#ccc" /></button>
-                                    <button onClick={() => handleDelete(file)} className="btn-ghost" style={{ padding: '10px' }} title="Excluir"><Trash2 size={20} color="#ff4d4d" /></button>
+                                    {file.storageKey && (
+                                        <button onClick={() => setViewingFile(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Visualizar">
+                                            <Eye size={20} color="#ccc" />
+                                        </button>
+                                    )}
+                                    <button onClick={() => handleDownload(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Baixar">
+                                        <Download size={20} color="#ccc" />
+                                    </button>
+                                    {/* Only show delete for owner */}
+                                    {file.ownerId === user.id && (
+                                        <button onClick={() => handleDelete(file)} className="btn-ghost" style={{ padding: '10px' }} title="Excluir">
+                                            <Trash2 size={20} color="#ff4d4d" />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}

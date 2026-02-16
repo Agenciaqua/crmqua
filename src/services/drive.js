@@ -53,8 +53,20 @@ export const driveService = {
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
-            return data; // Returns { id, name, mimeType }
+            // The upload endpoint returns limited fields. We need to fetch metadata again to get links.
+            const uploadData = await response.json();
+            
+            // Fetch full metadata including links
+            const metadataResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}?fields=id,name,mimeType,webViewLink,webContentLink`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            
+            if (metadataResponse.ok) {
+                 const fullData = await metadataResponse.json();
+                 return fullData;
+            }
+            
+            return uploadData; // Fallback
         } catch (error) {
             console.error('Drive Upload Error:', error);
             throw error;
