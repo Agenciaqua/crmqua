@@ -167,10 +167,18 @@ export default function Dashboard() {
                 const targetDate = d.toLocaleDateString('en-CA');
 
                 // Count where interaction happened on this specific day
+                let ignoredCount = 0;
+
                 const count = clients.filter(c => {
                     const clientDate = normalizeDate(c.lastInteraction);
                     const matchesDate = clientDate === targetDate;
                     const isLead = c.relationship === 'Lead' || !c.relationship;
+                    const isActive = c.status !== 'Inativo' && c.status !== 'Arquivado';
+
+                    if (matchesDate && (!isLead || !isActive)) {
+                        ignoredCount++;
+                        console.warn(`🚫 IGNORED MATCH for ${targetDate}:`, c.name, c.relationship, c.status);
+                    }
 
                     // DEBUG LOGGING
                     if (c.lastInteraction && matchesDate) {
@@ -195,11 +203,10 @@ export default function Dashboard() {
 
                     return isLead &&
                         matchesDate &&
-                        c.status !== 'Inativo' &&
-                        c.status !== 'Arquivado';
+                        isActive;
                 }).length;
 
-                weekData.push({ name: days[i], leads: count });
+                weekData.push({ name: days[i], leads: count, ignored: ignoredCount });
             }
 
             console.log("📊 FINAL CHART DATA:", weekData);
@@ -468,19 +475,21 @@ export default function Dashboard() {
 
             {/* DEBUG PANEL - REMOVE AFTER FIX */}
             <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #333', borderRadius: '8px', background: '#111', color: '#0f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                <h4>🕵️ DEBUG CHART DATA</h4>
-                <p>Total Clients/Leads: {recentClients.length > 0 ? 'Loaded' : 'Loading...'}</p>
+                <h4>🕵️ DEBUG CHART DATA - V2</h4>
+                <p>Clients Loaded: {recentClients.length}</p>
                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                    {chartData.map(d => <span key={d.name} style={{ marginRight: '10px' }}>{d.name}: {d.leads}</span>)}
+                    {chartData.map(d => (
+                        <div key={d.name} style={{ display: 'flex', gap: '15px', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: 'bold' }}>{d.name}:</span>
+                            <span style={{ color: '#fff' }}>Leads: {d.leads}</span>
+                            {d.ignored > 0 && <span style={{ color: 'orange' }}>Ignored: {d.ignored}</span>}
+                        </div>
+                    ))}
                 </div>
                 <hr style={{ borderColor: '#333', margin: '10px 0' }} />
-                <h5>Top 5 Interactions Found:</h5>
-                {stats.activeLeads > -1 && (() => {
-                    // Re-fetch or use state? We can't easily access 'clients' here as it's local in refreshData.
-                    // But we can verify if chartData is all zeros.
-                    const total = chartData.reduce((acc, curr) => acc + curr.leads, 0);
-                    return <div>Total Leads in Chart: {total}</div>
-                })()}
+                <p style={{ fontSize: '0.75rem', color: '#888' }}>
+                    If "Ignored" > 0, it means interactions exist but are hidden due to Status (Inativo/Arquivado) or Relationship (Cliente).
+                </p>
             </div>
         </Layout>
     );
