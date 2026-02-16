@@ -465,6 +465,23 @@ export default function Dashboard() {
             </div>
 
             {isClientModalOpen && <AddClientModal onClose={() => setIsClientModalOpen(false)} onSave={handleAddClient} />}
+
+            {/* DEBUG PANEL - REMOVE AFTER FIX */}
+            <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #333', borderRadius: '8px', background: '#111', color: '#0f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                <h4>🕵️ DEBUG CHART DATA</h4>
+                <p>Total Clients/Leads: {recentClients.length > 0 ? 'Loaded' : 'Loading...'}</p>
+                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    {chartData.map(d => <span key={d.name} style={{ marginRight: '10px' }}>{d.name}: {d.leads}</span>)}
+                </div>
+                <hr style={{ borderColor: '#333', margin: '10px 0' }} />
+                <h5>Top 5 Interactions Found:</h5>
+                {stats.activeLeads > -1 && (() => {
+                    // Re-fetch or use state? We can't easily access 'clients' here as it's local in refreshData.
+                    // But we can verify if chartData is all zeros.
+                    const total = chartData.reduce((acc, curr) => acc + curr.leads, 0);
+                    return <div>Total Leads in Chart: {total}</div>
+                })()}
+            </div>
         </Layout>
     );
 }
