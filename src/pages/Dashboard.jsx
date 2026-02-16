@@ -488,7 +488,7 @@ export default function Dashboard() {
                 </div>
                 <hr style={{ borderColor: '#333', margin: '10px 0' }} />
                 <p style={{ fontSize: '0.75rem', color: '#888' }}>
-                    If "Ignored" > 0, it means interactions exist but are hidden due to Status (Inativo/Arquivado) or Relationship (Cliente).
+                    If "Ignored" &gt; 0, it means interactions exist but are hidden due to Status (Inativo/Arquivado) or Relationship (Cliente).
                 </p>
             </div>
         </Layout>
