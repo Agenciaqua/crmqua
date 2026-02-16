@@ -18,23 +18,74 @@ const AIChatWidget = () => {
 
     const apiKey = GEMINI_API_KEY;
 
-    // Database of diverse prompts
+    // Database of diverse prompts (50+ Scenarios)
     const PROMPT_BANK = [
-        { label: "Abordagem Fria", query: "Crie um script de abordagem fria para LinkedIn focado em dor e solução, sem parecer vendedor chato." },
-        { label: "Follow-up Suave", query: "Escreva uma mensagem de follow-up para um cliente que recebeu a proposta há 3 dias e não respondeu." },
-        { label: "Objeção Preço", query: "O cliente disse 'Está caro'. Me dê 3 opções de resposta para contornar isso focando em valor." },
-        { label: "Recuperar Ex-Client", query: "Escreva um email para tentar reativar um cliente que cancelou há 6 meses." },
-        { label: "Pedir Indicação", query: "Como posso pedir indicação para um cliente satisfeito de forma natural? Crie um script." },
-        { label: "Fechamento", query: "Me dê 3 técnicas de fechamento para usar quando o cliente diz 'Vou pensar'." },
-        { label: "Gatekeeper", query: "O que falar para a secretária para conseguir falar com o decisor da empresa?" },
-        { label: "Email de Apresentação", query: "Crie um email de apresentação curto (max 4 linhas) para agendar uma reunião." },
-        { label: "Pós-Reunião", query: "Escreva um email de resumo pós-reunião com Call to Action claro para o próximo passo." },
-        { label: "Cliente Indeciso", query: "O cliente está comparando com o concorrente. O que devo perguntar para diferenciar meu produto?" },
-        { label: "Qualificação", query: "Quais são as 5 melhores perguntas para qualificar um lead B2B e saber se ele tem fit?" },
-        { label: "Desconto", query: "O cliente pediu desconto na primeira reunião. Como negar educadamente sem perder o interesse dele?" },
-        { label: "Ghosting", query: "O cliente sumiu após dizer que ia fechar. Crie uma mensagem 'break-up' (última tentativa) criativa." },
-        { label: "Upsell", query: "Como oferecer um plano mais caro para um cliente atual que já está satisfeito?" },
-        { label: "Networking", query: "Script para iniciar conversa em evento de networking sem perguntar 'o que você faz?' de cara." }
+        // --- PROSPECÇÃO & ABORDAGEM ---
+        { label: "Abordagem Fria LinkedIn", query: "Crie um script de abordagem fria para LinkedIn focado em dor e solução para gestores de RH." },
+        { label: "Cold Call Script", query: "Crie um roteiro de Cold Call de 30 segundos para falar com diretores de marketing sobre automação." },
+        { label: "Email de Apresentação", query: "Escreva um email curto (4 linhas) apresentando minha empresa de consultoria para um CEO." },
+        { label: "Gatekeeper", query: "O que falar para a secretária para conseguir ser transferido para o tomador de decisão?" },
+        { label: "Recuperar Ex-Client", query: "Escreva um email empático para tentar reativar um cliente que cancelou há 6 meses." },
+        { label: "Pedir Indicação", query: "Crie um script natural para pedir indicações de novos leads para um cliente recém-fechado." },
+        { label: "Networking Evento", query: "Como iniciar uma conversa em um evento de networking sem perguntar 'o que você faz?' logo de cara?" },
+        { label: "Social Selling", query: "Dê 3 ideias de comentários inteligentes para fazer em posts de prospects no LinkedIn." },
+        { label: "Mensagem de Áudio", query: "Crie um roteiro para uma mensagem de áudio no WhatsApp de 40s para um lead que baixou um ebook." },
+        { label: "Video Prospecting", query: "O que eu devo falar em um vídeo curto (Loom) de prospecção para chamar atenção do lead?" },
+
+        // --- QUALIFICAÇÃO ---
+        { label: "Perguntas SPIN", query: "Me dê 2 exemplos de perguntas de Situação, Problema, Implicação e Necessidade para vender software." },
+        { label: "Qualificação BANT", query: "Quais perguntas fazer para descobrir o Budget, Authority, Need e Timing (BANT) sem parecer um interrogatório?" },
+        { label: "Descobrir Dor", query: "Que perguntas abertas posso fazer para fazer o cliente me contar suas maiores dores operacionais?" },
+        { label: "Validar Decisor", query: "Como perguntar educadamente se a pessoa é quem toma a decisão final de compra?" },
+        { label: "Checar Concorrência", query: "Como perguntar se o cliente está cotando com concorrentes sem parecer inseguro?" },
+
+        // --- APRESENTAÇÃO & VALOR ---
+        { label: "Storytelling", query: "Crie uma micro-história de sucesso de um cliente fictício que economizou 30% com nossa solução." },
+        { label: "Diferenciação", query: "O cliente perguntou 'Por que devo escolher vocês?'. Crie uma resposta focada em atendimento e inovação." },
+        { label: "Pitch Elevador", query: "Crie um Elevator Pitch de 1 minuto sobre uma solução de energia solar para empresas." },
+        { label: "Proposta de Valor", query: "Reescreva esta frase para ficar mais impactante: 'Nós vendemos cadeiras confortáveis'." },
+        { label: "Focar em Benefício", query: "Transforme a característica 'bateria de 24h' em um benefício emocional para o cliente." },
+
+        // --- OBJEÇÕES ---
+        { label: "Objeção Preço", query: "O cliente disse 'Está caro'. Me dê 3 opções de resposta para contornar isso focando em ROI." },
+        { label: "Objeção 'Vou Pensar'", query: "O cliente disse 'Vou pensar'. Como responder para não deixar o deal esfriar?" },
+        { label: "Objeção Concorrente", query: "O cliente disse que o concorrente X é mais barato. Como argumentar sem falar mal do concorrente?" },
+        { label: "Objeção Sem Budget", query: "O cliente adorou mas disse que não tem orçamento agora. Como tentar salvar a venda?" },
+        { label: "Objeção 'Envie Email'", query: "Na cold call, o lead disse 'Me mande por email'. Como tentar manter ele na linha?" },
+        { label: "Objeção Já Tenho", query: "O lead disse que já tem um fornecedor. Que pergunta fazer para plantar uma dúvida?" },
+
+        // --- FOLLOW-UP ---
+        { label: "Follow-up Suave", query: "Escreva uma mensagem de follow-up para quem recebeu a proposta há 3 dias e não respondeu." },
+        { label: "Follow-up Pós-Reunião", query: "Crie um email de resumo pós-reunião listando as dores identificadas e o próximo passo." },
+        { label: "Break-up Email", query: "Crie um email de despedida (break-up) leve para um lead que sumiu (ghosting) há 15 dias." },
+        { label: "Reengajamento", query: "Que conteúdo posso mandar para um lead que está 'morno' para lembrar dele da minha marca?" },
+        { label: "Cobrar Proposta", query: "Como cobrar um retorno sobre a proposta enviada sem parecer chato ou desesperado?" },
+
+        // --- NEGOCIAÇÃO & FECHAMENTO ---
+        { label: "Técnica Ou-Ou", query: "Crie um exemplo de fechamento usando a técnica de 'Ou isso ou aquilo' (Alternative Close)." },
+        { label: "Fechamento Direto", query: "Escreva uma frase de fechamento direto para usar quando o cliente já deu sinais de compra." },
+        { label: "Pedir Desconto", query: "O cliente pediu 20% de desconto. Como dar apenas 5% mas pedir algo em troca (ex: pagamento à vista)?" },
+        { label: "Urgência", query: "Como criar um senso de urgência ético para fechar o contrato ainda este mês?" },
+        { label: "Ancoragem", query: "Explique como usar a técnica de ancoragem de preço ao apresentar os planos." },
+
+        // --- PÓS-VENDA & CS ---
+        { label: "Boas-vindas", query: "Escreva um email caloroso de boas-vindas para um novo cliente que acabou de assinar." },
+        { label: "Pesquisa NPS", query: "Como pedir para o cliente responder uma pesquisa de satisfação (NPS) via WhatsApp?" },
+        { label: "Upsell", query: "Como oferecer um upgrade de plano para um cliente que já está tendo bons resultados?" },
+        { label: "Cross-sell", query: "Como oferecer um produto complementar para um cliente que comprou apenas o básico?" },
+        { label: "Evitar Churn", query: "Um cliente quer cancelar. O que perguntar para tentar reverter a situação?" },
+
+        // --- MENTORIA & ESTRATÉGIA ---
+        { label: "Produtividade", query: "Me dê 3 dicas para organizar a agenda de um vendedor e priorizar leads quentes." },
+        { label: "Motivação", query: "Escreva uma frase motivacional curta para um time de vendas que não bateu a meta." },
+        { label: "Análise de KPIs", query: "Quais são as 3 métricas mais importantes para avaliar a saúde do funil de vendas?" },
+        { label: "Definir Metas", query: "Como quebrar uma meta anual grande em metas semanais alcançáveis?" },
+        { label: "Lidar com 'Não'", query: "Como um vendedor deve trabalhar o mindset para não desanimar com os 'nãos' do dia a dia?" },
+        { label: "Venda Consultiva", query: "Qual a diferença prática entre venda transacional e venda consultiva? Resuma." },
+        { label: "Rapport", query: "Me dê 3 técnicas para criar conexão (rapport) rápida nos primeiros minutos de uma call." },
+        { label: "Escuta Ativa", query: "O que é escuta ativa e como usá-la para descobrir dores ocultas do cliente?" },
+        { label: "Gatilhos Mentais", query: "Dê exemplos de como usar o gatilho da Prova Social e da Escassez em um email." },
+        { label: "CRM", query: "Por que é importante registrar cada interação no CRM? Me dê 3 motivos para convencer a equipe." }
     ];
 
     const [quickPrompts, setQuickPrompts] = useState([]);
