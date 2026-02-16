@@ -219,7 +219,13 @@ export default function Clients() {
                             }}>
                                 {client.status}
                             </span>
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>{client.lastInteraction}</span>
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                                {client.lastInteraction ? (() => {
+                                    const cleanDate = client.lastInteraction.substring(0, 10);
+                                    const [y, m, d] = cleanDate.split('-');
+                                    return d && m && y && y.length === 4 ? `${d}/${m}/${y}` : client.lastInteraction;
+                                })() : ''}
+                            </span>
                         </div>
                     </div>
                 )) : (
