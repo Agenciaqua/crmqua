@@ -183,19 +183,33 @@ export default function Files() {
         }
 
         try {
-            // Use the internal proxy to download
-            const proxyUrl = `/.netlify/functions/download-proxy?id=${file.storageKey}&token=${token}`;
+            // Direct Client-Side Download (Bypassing Proxy)
+            const blob = await driveService.getFile(file.storageKey, token);
+            if (!blob) {
+                alert("Erro: Arquivo vazio ou não encontrado no Drive.");
+                return;
+            }
 
-            // Trigger download
+            // Create object URL and trigger download
+            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = proxyUrl;
+            a.style.display = 'none';
+            a.href = url;
             a.download = file.name;
             document.body.appendChild(a);
             a.click();
+
+            // Cleanup
+            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
         } catch (error) {
-            alert("Erro ao iniciar download: " + error.message);
+            console.error("Download Error:", error);
+            if (error.message === 'TokenExpired') {
+                alert("Sessão expirada. Faça login novamente.");
+            } else {
+                alert("Erro ao baixar arquivo: " + error.message);
+            }
         }
     };
 
