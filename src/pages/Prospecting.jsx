@@ -63,14 +63,20 @@ const Prospecting = () => {
     };
 
     const handleContacted = async (lead) => {
-        if (window.confirm(`Marcar ${lead.name} como contactado? Ele será movido para Clientes.`)) {
-            await db.update('clients', lead.id, {
-                status: 'Lead',
-                relationship: 'Contacted', // Tag logic
-                prospectingDay: null, // Remove from board
-                lastInteraction: new Date().toLocaleDateString('pt-BR')
-            });
-            refreshData();
+        if (window.confirm(`Marcar ${lead.name} como contactado?`)) {
+            try {
+                const todayISO = new Date().toISOString().split('T')[0];
+                await db.update('clients', lead.id, {
+                    status: 'Fazer Follow up', // Update status to reflect next step
+                    relationship: 'Lead', // Ensure it stays in Lead tab
+                    prospectingDay: null, // Remove from board
+                    lastInteraction: todayISO
+                });
+                refreshData();
+            } catch (error) {
+                console.error("Erro ao atualizar lead:", error);
+                alert("Erro ao atualizar lead: " + error.message);
+            }
         }
     };
 
