@@ -54,25 +54,30 @@ const AddLeadModal = ({ onClose, onSave, initialData }) => {
             }
         }
 
-        const leadData = {
-            ...formData,
-            hasTraffic: formData.hasTraffic === 'Sim',
-            status: initialData ? initialData.status : 'Prospecção', // Keep status if editing
-            category: initialData ? initialData.category : 'Frio',
-            status: initialData ? initialData.status : 'Prospecção', // Keep status if editing
-            category: initialData ? initialData.category : 'Frio',
-            lastInteraction: new Date().toLocaleDateString('pt-BR'),
-            ownerId: user.id
-        };
+        try {
+            const todayISO = new Date().toISOString().split('T')[0];
+            const leadData = {
+                ...formData,
+                hasTraffic: formData.hasTraffic === 'Sim',
+                status: initialData ? initialData.status : 'Prospecção',
+                category: initialData ? initialData.category : 'Frio',
+                relationship: 'Lead', // Definitivamente um Lead
+                lastInteraction: todayISO,
+                ownerId: user.id
+            };
 
-        if (initialData && initialData.id) {
-            await db.update('clients', initialData.id, leadData);
-        } else {
-            await db.add('clients', leadData);
+            if (initialData && initialData.id) {
+                await db.update('clients', initialData.id, leadData);
+            } else {
+                await db.add('clients', leadData);
+            }
+
+            onSave();
+            onClose();
+        } catch (error) {
+            console.error("Erro ao salvar lead:", error);
+            alert("Erro ao salvar lead. Verifique os dados e tente novamente.\n" + error.message);
         }
-
-        onSave();
-        onClose();
     };
 
     return (

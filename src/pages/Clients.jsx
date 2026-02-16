@@ -27,13 +27,18 @@ export default function Clients() {
     };
 
     const handleSaveClient = async (clientData) => {
-        if (editingClient) {
-            await db.update('clients', editingClient.id, clientData);
-        } else {
-            await db.add('clients', clientData);
+        try {
+            if (editingClient) {
+                await db.update('clients', editingClient.id, clientData);
+            } else {
+                await db.add('clients', clientData);
+            }
+            refreshClients();
+            setEditingClient(null);
+        } catch (error) {
+            console.error("Erro ao salvar cliente:", error);
+            alert("Erro ao salvar cliente/lead. Verifique se todos os campos estão preenchidos corretamente.\n" + error.message);
         }
-        refreshClients();
-        setEditingClient(null);
     };
 
     const handleEditClick = (client) => {

@@ -30,10 +30,12 @@ const AddClientModal = ({ onClose, onSave, initialData }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const todayISO = new Date().toISOString().split('T')[0];
+
         onSave({
             ...formData,
-            lastInteraction: initialData?.lastInteraction || new Date().toLocaleDateString('pt-BR'),
-            ownerId: initialData?.ownerId || user?.id // Keep existing owner if editing, else assign current user
+            lastInteraction: initialData?.lastInteraction || todayISO,
+            ownerId: initialData?.ownerId || user?.id
         });
         onClose();
     };
