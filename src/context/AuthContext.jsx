@@ -77,13 +77,17 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (userFound) {
+                console.log("Login successful, user:", userFound);
                 setUser(userFound);
                 localStorage.setItem('qua_user_session', JSON.stringify(userFound));
                 return true;
             }
+            console.warn("User not found after creation attempt.");
+            alert("Erro: Usuário não encontrado após criação. Tente novamente.");
             return false;
         } catch (error) {
             console.error("Google Login Error:", error);
+            alert("Erro no Login Google (AuthContext): " + error.message);
             return false;
         }
     };
