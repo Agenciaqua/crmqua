@@ -16,33 +16,24 @@ export default function Login() {
     const handleGoogleLogin = useGoogleLogin({
         scope: 'https://www.googleapis.com/auth/drive.file', // Request permission to upload files
         onSuccess: async (tokenResponse) => {
-            console.log("Google OAuth Success", tokenResponse);
             try {
                 const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
                 const userData = await res.json();
-                console.log("Google User Data fetch success:", userData);
 
                 // Pass access token to context so we can use it for Drive API later
                 if (await loginWithGoogle(userData, tokenResponse.access_token)) {
-                    console.log("Context login success, navigating...");
                     navigate('/dashboard');
                 } else {
-                    console.error("Context login returned false");
-                    alert("Falha no login interno. Consulte o console.");
+                    setError('Falha no login interno.');
                 }
             } catch (err) {
                 console.error("Google info fetch error:", err);
-                setError('Falha ao buscar dados do Google: ' + err.message);
-                alert("Erro ao buscar dados do Google: " + err.message);
+                setError('Falha ao buscar dados do Google.');
             }
         },
-        onError: (err) => {
-            console.error("Google Login Failed", err);
-            setError('Login com Google Falhou.');
-            alert("Login com Google Falhou (Popup).");
-        },
+        onError: () => setError('Login com Google Falhou.'),
     });
 
     const handleSubmit = async (e) => {

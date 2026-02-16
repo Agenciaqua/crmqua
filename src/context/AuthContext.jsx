@@ -67,27 +67,24 @@ export const AuthProvider = ({ children }) => {
                 const newUser = {
                     name: userInfo.name,
                     email: userInfo.email,
+                    password: `GOOGLE_AUTH_${crypto.randomUUID()}`, // Placeholder to satisfy DB constraint
                     role: null, // Force onboarding
                     avatar: userInfo.picture,
                     createdAt: new Date().toLocaleDateString('pt-BR')
                 };
-                // Add directly to DB
+
                 // Add directly to DB and get the result immediately
                 userFound = await db.add('users', newUser);
             }
 
             if (userFound) {
-                console.log("Login successful, user:", userFound);
                 setUser(userFound);
                 localStorage.setItem('qua_user_session', JSON.stringify(userFound));
                 return true;
             }
-            console.warn("User not found after creation attempt.");
-            alert("Erro: Usuário não encontrado após criação. Tente novamente.");
             return false;
         } catch (error) {
             console.error("Google Login Error:", error);
-            alert("Erro no Login Google (AuthContext): " + error.message);
             return false;
         }
     };
