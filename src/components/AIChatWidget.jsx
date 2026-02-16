@@ -18,6 +18,35 @@ const AIChatWidget = () => {
 
     const apiKey = GEMINI_API_KEY;
 
+    // Database of diverse prompts
+    const PROMPT_BANK = [
+        { label: "Abordagem Fria", query: "Crie um script de abordagem fria para LinkedIn focado em dor e solução, sem parecer vendedor chato." },
+        { label: "Follow-up Suave", query: "Escreva uma mensagem de follow-up para um cliente que recebeu a proposta há 3 dias e não respondeu." },
+        { label: "Objeção Preço", query: "O cliente disse 'Está caro'. Me dê 3 opções de resposta para contornar isso focando em valor." },
+        { label: "Recuperar Ex-Client", query: "Escreva um email para tentar reativar um cliente que cancelou há 6 meses." },
+        { label: "Pedir Indicação", query: "Como posso pedir indicação para um cliente satisfeito de forma natural? Crie um script." },
+        { label: "Fechamento", query: "Me dê 3 técnicas de fechamento para usar quando o cliente diz 'Vou pensar'." },
+        { label: "Gatekeeper", query: "O que falar para a secretária para conseguir falar com o decisor da empresa?" },
+        { label: "Email de Apresentação", query: "Crie um email de apresentação curto (max 4 linhas) para agendar uma reunião." },
+        { label: "Pós-Reunião", query: "Escreva um email de resumo pós-reunião com Call to Action claro para o próximo passo." },
+        { label: "Cliente Indeciso", query: "O cliente está comparando com o concorrente. O que devo perguntar para diferenciar meu produto?" },
+        { label: "Qualificação", query: "Quais são as 5 melhores perguntas para qualificar um lead B2B e saber se ele tem fit?" },
+        { label: "Desconto", query: "O cliente pediu desconto na primeira reunião. Como negar educadamente sem perder o interesse dele?" },
+        { label: "Ghosting", query: "O cliente sumiu após dizer que ia fechar. Crie uma mensagem 'break-up' (última tentativa) criativa." },
+        { label: "Upsell", query: "Como oferecer um plano mais caro para um cliente atual que já está satisfeito?" },
+        { label: "Networking", query: "Script para iniciar conversa em evento de networking sem perguntar 'o que você faz?' de cara." }
+    ];
+
+    const [quickPrompts, setQuickPrompts] = useState([]);
+
+    // Randomize prompts on open
+    useEffect(() => {
+        if (isOpen) {
+            const shuffled = [...PROMPT_BANK].sort(() => 0.5 - Math.random());
+            setQuickPrompts(shuffled.slice(0, 3));
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         if (!apiKey) {
             setApiKeyMissing(true);
@@ -215,9 +244,9 @@ const AIChatWidget = () => {
 
                     {/* Quick Actions */}
                     <div style={{ padding: '0 16px 10px 16px', display: 'flex', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none' }}>
-                        <QuickButton label="Abordagem Fria" query="Escreva um script curto de abordagem fria para vender serviços B2B no Linkedin" />
-                        <QuickButton label="Follow-up" query="Escreva uma mensagem de cobrança suave para um cliente que visualizou a proposta mas não respondeu" />
-                        <QuickButton label="Objeção Preço" query="Como responder a objeção: 'Seu preço está acima do mercado'?" />
+                        {quickPrompts.map((prompt, idx) => (
+                            <QuickButton key={idx} label={prompt.label} query={prompt.query} />
+                        ))}
                     </div>
 
                     {/* Input Area */}
