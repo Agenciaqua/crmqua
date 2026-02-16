@@ -167,30 +167,7 @@ export default function Files() {
         }
     };
 
-    const handleFixPermissions = async (file) => {
-        const token = localStorage.getItem('qua_google_token');
-        if (!token) {
-            alert("Erro: Token não encontrado. Faça login novamente.");
-            return;
-        }
 
-        const confirmFix = window.confirm(`Gerar Link Público para "${file.name}"?\n(Isso resolve o erro 404 para qualquer pessoa com o link)`);
-        if (!confirmFix) return;
-
-        try {
-            alert(`Liberando acesso geral para o arquivo...`);
-            // Pass null for email since we changed drive.js to ignore it for 'anyone' type
-            const result = await driveService.shareFile(file.storageKey, null, token);
-
-            if (result.success) {
-                alert("✅ SUCESSO! Arquivo liberado. Agora QUALQUER pessoa com o link poderá baixar.");
-            } else {
-                alert(`❌ ERRO: ${result.error}`);
-            }
-        } catch (error) {
-            alert(`❌ ERRO CRÍTICO: ${error.message}`);
-        }
-    };
 
     const handleDownload = async (file) => {
         const token = localStorage.getItem('qua_google_token');
@@ -264,10 +241,10 @@ export default function Files() {
                 <p style={{ color: 'var(--color-text-dim)' }}>Envie documentos, imagens ou contratos (Salvamento Interno Local)</p>
             </div>
 
-            <div className="glass-panel overflow-auto-mobile" style={{ padding: '0', overflow: 'hidden' /* Desktop default */ }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' /* Ensure table doesn't squash */ }}>
+            <div className="glass-panel" style={{ padding: '0', overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
                     <thead>
-                        <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'sticky', top: 0, backdropFilter: 'blur(10px)', zIndex: 10 }}>
                             <th style={{ padding: '20px 30px', color: '#888', fontWeight: '600', fontSize: '0.85rem' }}>NOME / CATEGORIA</th>
                             <th style={{ padding: '20px 30px', color: '#888', fontWeight: '600', fontSize: '0.85rem' }}>TAMANHO</th>
                             <th style={{ padding: '20px 30px', color: '#888', fontWeight: '600', fontSize: '0.85rem' }}>PARA QUEM</th>
@@ -293,7 +270,6 @@ export default function Files() {
                                 <td style={{ padding: '20px 30px', textAlign: 'right' }}>
                                     {file.storageKey && <button onClick={() => setViewingFile(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Visualizar"><Eye size={20} color="#ccc" /></button>}
                                     <button onClick={() => handleDownload(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Baixar"><Download size={20} color="#ccc" /></button>
-                                    <button onClick={() => handleFixPermissions(file)} className="btn-ghost" style={{ padding: '10px', marginRight: '8px' }} title="Liberar Acesso Público (Resolver 404)"><Upload size={20} color="#4CAF50" /></button>
                                     <button onClick={() => handleDelete(file)} className="btn-ghost" style={{ padding: '10px' }} title="Excluir"><Trash2 size={20} color="#ff4d4d" /></button>
                                 </td>
                             </tr>
