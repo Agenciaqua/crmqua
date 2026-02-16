@@ -97,6 +97,24 @@ export default function Files() {
                 // Upload to Google Drive
                 const driveData = await driveService.uploadFile(newFile.file, token);
                 driveFileId = driveData.id;
+
+                // Automatically make file accessible to anyone with the link
+                try {
+                    await driveService.shareFile(driveFileId, null, token);
+                } catch (shareErr) {
+                    console.warn("Falha ao tornar arquivo público:", shareErr);
+                }
+
+                // Save metadata to Database
+                await db.add('files', {
+                    ...newFile,
+                    storageKey: driveFileId, // Now stores Drive ID instead of local key
+                    webContentLink: driveData.webContentLink, // For direct download
+                    webViewLink: driveData.webViewLink, // For viewing
+                    ownerId: user.id
+                });
+                refreshFiles();
+
             } catch (error) {
                 console.error("Erro no upload pro Drive:", error);
 
@@ -115,37 +133,6 @@ export default function Files() {
                 // This should not happen with the modal fix, but good for safety
                 alert("Erro interno: Arquivo não recebido do modal.");
             }
-        }
-
-        // Validate Drive Upload
-        if (!driveFileId && newFile.file) {
-            alert("Falha no upload para o Google Drive. O arquivo não será salvo no sistema. Verifique seu login/token.");
-            return;
-        }
-
-        // Automatically make file accessible to anyone with the link
-        if (driveFileId) {
-            try {
-                // We don't need a specific recipient email anymore, just make it accessible
-                await driveService.shareFile(driveFileId, null, token);
-            } catch (shareErr) {
-                console.warn("Falha ao tornar arquivo público:", shareErr);
-            }
-        }
-
-        // Save metadata to Database
-        try {
-            await db.add('files', {
-                ...newFile,
-                storageKey: driveFileId, // Now stores Drive ID instead of local key
-                webContentLink: driveData.webContentLink, // For direct download
-                webViewLink: driveData.webViewLink, // For viewing
-                ownerId: user.id
-            });
-            refreshFiles();
-        } catch (dbError) {
-            console.error("Failed to save file metadata:", dbError);
-            alert("Erro ao salvar registro do arquivo no sistema: " + dbError.message);
         }
     };
 
@@ -172,46 +159,20 @@ export default function Files() {
 
 
     const handleDownload = async (file) => {
-        const token = localStorage.getItem('qua_google_token');
-
-        if (!token) {
-            alert("Erro: Token de acesso Google não encontrado. Faça Logout e Login novamente.");
+        // Strategy: Use Google's official "export/view" links to bypass API scope issues for shared files
+        // If we have the webContentLink (saved from upload), use/open it.
+        if (file.webContentLink) {
+            window.open(file.webContentLink, '_blank');
             return;
         }
 
-        if (!file.storageKey) {
-            alert(`Erro: Este arquivo (${file.name}) não possui vínculo com o Drive (ID nulo).`);
-            return;
-        }
-
-        try {
-            // Direct Client-Side Download (Bypassing Proxy)
-            const blob = await driveService.getFile(file.storageKey, token);
-            if (!blob) {
-                alert("Erro: Arquivo vazio ou não encontrado no Drive.");
-                return;
-            }
-
-            // Create object URL and trigger download
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-
-            // Cleanup
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-        } catch (error) {
-            console.error("Download Error:", error);
-            if (error.message === 'TokenExpired') {
-                alert("Sessão expirada. Faça login novamente.");
-            } else {
-                alert("Erro ao baixar arquivo: " + error.message);
-            }
+        // Fallback: Construct a direct download/view link
+        // This works for files with "reader/anyone" permission
+        if (file.storageKey) {
+            const fallbackUrl = `https://drive.google.com/uc?id=${file.storageKey}&export=download`;
+            window.open(fallbackUrl, '_blank');
+        } else {
+            alert("Erro: Link de download não disponível.");
         }
     };
 
