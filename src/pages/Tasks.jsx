@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { db } from '../services/database';
 import AddTaskModal from '../components/AddTaskModal';
 
-const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
+const TaskCard = ({ task, onMove, onEdit, onDelete, onArchive }) => {
     const [assigneeName, setAssigneeName] = React.useState('Carregando...');
     const [ownerName, setOwnerName] = React.useState('');
 
@@ -92,6 +92,15 @@ const TaskCard = ({ task, onMove, onEdit, onDelete }) => {
                 <div style={{ display: 'flex', gap: '8px' }}>
                     {task.status !== 'todo' && <button onClick={() => onMove(task, -1)} title="Voltar" className="btn-ghost" style={{ padding: '6px' }}><ChevronLeft size={16} /></button>}
                     {task.status !== 'done' && <button onClick={() => onMove(task, 1)} title="Avançar" className="btn-ghost" style={{ padding: '6px', color: 'var(--color-orange)' }}><ChevronRight size={16} /></button>}
+                    {task.status === 'done' && (
+                        <button
+                            onClick={() => onArchive(task)}
+                            className="btn-primary"
+                            style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '12px' }}
+                        >
+                            Confirmar término
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -169,6 +178,13 @@ export default function Tasks() {
         }
     };
 
+    const handleArchiveTask = async (task) => {
+        if (window.confirm("Confirmar o término definitivo desta tarefa? Ela sairá do quadro.")) {
+            await db.update('tasks', task.id, { status: 'archived' });
+            loadTasks();
+        }
+    };
+
     const filterTasks = (status) => tasks.filter(t => t.status === status);
 
     const columns = [
@@ -216,6 +232,7 @@ export default function Tasks() {
                                     onMove={handleMoveTask}
                                     onEdit={openEditModal}
                                     onDelete={handleDeleteTask}
+                                    onArchive={handleArchiveTask}
                                 />
                             )}
                         </div>

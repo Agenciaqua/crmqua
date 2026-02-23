@@ -129,8 +129,8 @@ export default function Dashboard() {
                 meetings: futureMeetings.length
             });
             setRecentClients(clients.slice(-5).reverse());
-            // Filter tasks for today that are NOT done (Handle ISO strings)
-            setTodaysTasks(tasks.filter(t => t.dueDate && t.dueDate.substring(0, 10) === todayStr && t.status !== 'done'));
+            // Filter tasks for today that are NOT done/archived (Handle ISO strings)
+            setTodaysTasks(tasks.filter(t => t.dueDate && t.dueDate.substring(0, 10) === todayStr && t.status !== 'done' && t.status !== 'archived'));
 
             // Take top 3 for the widget
             setUpcomingMeetings(futureMeetings.slice(0, 3));
