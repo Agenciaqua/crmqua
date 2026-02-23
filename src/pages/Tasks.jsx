@@ -153,16 +153,24 @@ export default function Tasks() {
             await db.add('tasks', formattedTask);
         }
 
-        // Send WhatsApp Notification if assignee exists
+        // Send WhatsApp Notification if assignee exists (Background / API)
         if (formattedTask.assigneeId && isNewAssignee) {
             const assignee = await db.getById('users', formattedTask.assigneeId);
             if (assignee && assignee.id !== user.id) {
                 if (assignee.phone) {
-                    const message = `Olá ${assignee.name.split(' ')[0]}, você recebeu uma nova tarefa!\n\n*${formattedTask.title}*\nPrazo: ${formattedTask.dueDate ? formattedTask.dueDate.split('-').reverse().join('/') : 'Sem prazo'}\nPrioridade: ${formattedTask.priority === 'high' ? 'Alta' : formattedTask.priority === 'medium' ? 'Média' : 'Baixa'}\n\n${formattedTask.description || ''}`;
-                    const encodedMessage = encodeURIComponent(message);
+                    const message = `Olá *${assignee.name.split(' ')[0]}*, você recebeu uma nova tarefa no CRM QUA!\n\n🔹 *${formattedTask.title}*\n📅 Prazo: ${formattedTask.dueDate ? formattedTask.dueDate.split('-').reverse().join('/') : 'Sem prazo'}\n⚠️ Prioridade: ${formattedTask.priority === 'high' ? 'Alta' : formattedTask.priority === 'medium' ? 'Média' : 'Baixa'}\n\n${formattedTask.description ? `📝 Detalhes: \n${formattedTask.description}` : ''}`;
                     const phone = assignee.phone.replace(/\D/g, ''); // Remove non-digits
                     if (phone) {
-                        window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+                        try {
+                            // Dispara de forma assíncrona para não travar a UI (Fire and Forget)
+                            fetch('/.netlify/functions/send_whatsapp', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ phone, message })
+                            }).catch(err => console.error("Error triggering silent WhatsApp:", err));
+                        } catch (e) {
+                            console.error("Failed to call WhatsApp background function", e);
+                        }
                     }
                 } else {
                     alert(`A tarefa foi atribuída, mas ${assignee.name} não tem um WhatsApp cadastrado no perfil.`);
