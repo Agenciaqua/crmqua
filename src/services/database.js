@@ -12,7 +12,7 @@ const SCHEMAS = {
         'description', 'type', 'ownerId'
     ],
     users: [
-        'name', 'email', 'password', 'role', 'avatar'
+        'name', 'email', 'password', 'role', 'avatar', 'phone'
     ],
     meetings: [
         'title', 'clientId', 'date', 'time', 'duration', 'type',

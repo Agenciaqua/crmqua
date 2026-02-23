@@ -143,12 +143,31 @@ export default function Tasks() {
             dueDate: taskData.dueDate || null
         };
 
+        const isNewAssignee = !selectedTask || selectedTask.assigneeId !== formattedTask.assigneeId;
+
         if (selectedTask) {
             // Edit Mode
             await db.update('tasks', selectedTask.id, formattedTask);
         } else {
             // Create Mode
             await db.add('tasks', formattedTask);
+        }
+
+        // Send WhatsApp Notification if assignee exists
+        if (formattedTask.assigneeId && isNewAssignee) {
+            const assignee = await db.getById('users', formattedTask.assigneeId);
+            if (assignee && assignee.id !== user.id) {
+                if (assignee.phone) {
+                    const message = `Olá ${assignee.name.split(' ')[0]}, você recebeu uma nova tarefa!\n\n*${formattedTask.title}*\nPrazo: ${formattedTask.dueDate ? formattedTask.dueDate.split('-').reverse().join('/') : 'Sem prazo'}\nPrioridade: ${formattedTask.priority === 'high' ? 'Alta' : formattedTask.priority === 'medium' ? 'Média' : 'Baixa'}\n\n${formattedTask.description || ''}`;
+                    const encodedMessage = encodeURIComponent(message);
+                    const phone = assignee.phone.replace(/\D/g, ''); // Remove non-digits
+                    if (phone) {
+                        window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+                    }
+                } else {
+                    alert(`A tarefa foi atribuída, mas ${assignee.name} não tem um WhatsApp cadastrado no perfil.`);
+                }
+            }
         }
 
         loadTasks();

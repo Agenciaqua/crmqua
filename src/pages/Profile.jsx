@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { User, Lock, Mail, Camera, Save } from 'lucide-react';
+import { User, Lock, Mail, Camera, Save, Phone } from 'lucide-react';
 import { db } from '../services/database';
 
 export default function Profile() {
@@ -9,6 +9,7 @@ export default function Profile() {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [avatar, setAvatar] = useState('');
+    const [phone, setPhone] = useState('');
 
     // Role Switching State
     const [pin, setPin] = useState('');
@@ -20,6 +21,7 @@ export default function Profile() {
         if (user) {
             setName(user.name || '');
             setAvatar(user.avatar || '');
+            setPhone(user.phone || '');
         }
     }, [user]);
 
@@ -37,7 +39,7 @@ export default function Profile() {
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            const updates = { name, avatar };
+            const updates = { name, avatar, phone };
             if (password) {
                 updates.password = password;
             }
@@ -128,6 +130,21 @@ export default function Profile() {
                                     style={{ width: '100%', opacity: 0.6, cursor: 'not-allowed' }}
                                 />
                                 <Mail size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none' }} />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ color: '#ccc', fontSize: '0.9rem' }}>WhatsApp / Telefone</label>
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="Ex: 5511999999999"
+                                    className="input-with-icon"
+                                    style={{ width: '100%' }}
+                                />
+                                <Phone size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none' }} />
                             </div>
                         </div>
 
