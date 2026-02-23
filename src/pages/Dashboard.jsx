@@ -122,7 +122,7 @@ export default function Dashboard() {
             const activeClientsCount = clients.filter(c => c.relationship === 'Cliente' && c.status !== 'Inativo').length;
             const activeLeadsCount = clients.filter(c => (c.relationship === 'Lead' || !c.relationship) && c.status !== 'Inativo').length;
 
-            // Task Permission Logic: Manager sees all, others see only assigned/owned
+            // Task Permission Logic: Manager sees all in STATS, but "Para Hoje" should ONLY be their own tasks
             const isManager = ['gestor', 'manager', 'admin'].includes(user.role?.toLowerCase());
             const visibleTasks = isManager
                 ? tasks
@@ -135,8 +135,15 @@ export default function Dashboard() {
                 meetings: futureMeetings.length
             });
             setRecentClients(clients.slice(-5).reverse());
-            // Filter tasks for today that are NOT done/archived (Handle ISO strings)
-            setTodaysTasks(visibleTasks.filter(t => t.dueDate && t.dueDate.substring(0, 10) === todayStr && t.status !== 'done' && t.status !== 'archived'));
+
+            // Filter tasks for today that are NOT done/archived, and STRICTLY assigned to the user
+            setTodaysTasks(tasks.filter(t =>
+                t.assigneeId === user.id &&
+                t.dueDate &&
+                t.dueDate.substring(0, 10) === todayStr &&
+                t.status !== 'done' &&
+                t.status !== 'archived'
+            ));
 
             // Take top 3 for the widget
             setUpcomingMeetings(futureMeetings.slice(0, 3));
