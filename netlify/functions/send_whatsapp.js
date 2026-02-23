@@ -17,10 +17,8 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Configuração das Variáveis de Ambiente na Netlify
-        // Você precisa adicionar essas chaves no painel da Netlify (Site settings > Environment variables)
-        const apiUrl = process.env.WHATSAPP_API_URL;     // Ex: "https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text"
-        const apiToken = process.env.WHATSAPP_API_TOKEN; // Usado caso use headers como Bearer Token ou ChatPro/Evolution
+        const apiUrl = process.env.WHATSAPP_API_URL;
+        const apiToken = process.env.WHATSAPP_API_TOKEN;
 
         if (!apiUrl) {
             console.log("Mock enviando mensagem para", phone, ":", message);
@@ -30,38 +28,48 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Estrutura genérica de disparo (Ajuste o payload conforme a documentação da sua API: Z-API, Evolution, etc)
+        // Generic Payload for Z-API / Evolution
         const payload = {
-            phone: phone, // A maioria das APIs aceita 'phone' ou 'number' no formato 5511999999999
-            message: message // ou 'text'
+            phone: phone, // A maioria das APIs aceita 'phone' ou 'number'
+            message: message
         };
+
+        console.log(`[WhatsApp API] Tentando enviar para: ${phone} via ${apiUrl}`);
 
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...(apiToken && { 'Authorization': `Bearer ${apiToken}` }), // Adiciona header de Auth se existir
-                // 'apikey': apiToken // Descomente caso use Evolution API / N8N headers customizados
+                ...(apiToken && { 'Authorization': `Bearer ${apiToken}` }),
             },
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-            throw new Error(`API Externa respondeu com status: ${response.status}`);
+        // Tentar extrair corpo de erro da API Externa
+        const responseText = await response.text();
+        let data = {};
+        try {
+            data = JSON.parse(responseText);
+        } catch (e) {
+            data = { rawText: responseText };
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+            console.error(`[WhatsApp API] Erro do provedor: Status ${response.status}`, data);
+            throw new Error(`A API Externa (Z-API/Evolution) falhou: HTTP ${response.status} - ${JSON.stringify(data)}`);
+        }
 
+        console.log(`[WhatsApp API] Sucesso:`, data);
         return {
             statusCode: 200,
             body: JSON.stringify({ success: true, provider_response: data })
         };
 
     } catch (error) {
-        console.error("Erro ao enviar WhatsApp:", error);
+        console.error("[WhatsApp API] Exception caught:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to send WhatsApp message', details: error.message })
+            body: JSON.stringify({ error: 'Falha ao processar o envio na Netlify', details: error.message })
         };
     }
 };

@@ -163,12 +163,22 @@ export default function Tasks() {
                     if (phone) {
                         try {
                             alert('A tarefa foi atribuída e o WhatsApp está sendo enviado no fundo...');
-                            // Dispara de forma assíncrona para não travar a UI (Fire and Forget)
+                            // Dispara de forma assíncrona, mas com tratamento de erro real
                             fetch('/.netlify/functions/send_whatsapp', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ phone, message })
-                            }).catch(err => console.error("Error triggering silent WhatsApp:", err));
+                            }).then(async (res) => {
+                                const data = await res.json();
+                                if (!res.ok || data.error) {
+                                    alert(`⚠️ Erro ao enviar WhatsApp:\n${data.error || 'Falha na Netlify'}\nDetalhes: ${data.details || JSON.stringify(data)}`);
+                                } else {
+                                    console.log("WhatsApp enviado com sucesso:", data);
+                                }
+                            }).catch(err => {
+                                console.error("Error triggering silent WhatsApp:", err);
+                                alert(`⚠️ Erro de rede ao tentar enviar o WhatsApp: ${err.message}. Verifique a sua conexão ou console.`);
+                            });
                         } catch (e) {
                             console.error("Failed to call WhatsApp background function", e);
                         }
