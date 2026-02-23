@@ -19,6 +19,7 @@ exports.handler = async (event, context) => {
 
         const apiUrl = process.env.WHATSAPP_API_URL;
         const apiToken = process.env.WHATSAPP_API_TOKEN;
+        const clientToken = process.env.WHATSAPP_CLIENT_TOKEN;
 
         if (!apiUrl) {
             console.log("Mock enviando mensagem para", phone, ":", message);
@@ -41,6 +42,7 @@ exports.handler = async (event, context) => {
             headers: {
                 'Content-Type': 'application/json',
                 ...(apiToken && { 'Authorization': `Bearer ${apiToken}` }),
+                ...(clientToken && { 'client-token': clientToken })
             },
             body: JSON.stringify(payload)
         });
