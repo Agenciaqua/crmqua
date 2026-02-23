@@ -162,6 +162,7 @@ export default function Tasks() {
                     const phone = assignee.phone.replace(/\D/g, ''); // Remove non-digits
                     if (phone) {
                         try {
+                            alert('A tarefa foi atribuída e o WhatsApp está sendo enviado no fundo...');
                             // Dispara de forma assíncrona para não travar a UI (Fire and Forget)
                             fetch('/.netlify/functions/send_whatsapp', {
                                 method: 'POST',
