@@ -93,38 +93,46 @@ const ImportListModal = ({ onClose, onSave }) => {
     };
 
     const handleConfirmImport = async () => {
-        // Validation: Check daily limits
-        const acc = {};
-        parsedLeads.forEach(l => {
-            const day = l.prospectingDay || 'Segunda-feira'; // Default
-            acc[day] = (acc[day] || 0) + 1;
-        });
+        setIsProcessing(true);
+        try {
+            // Validation: Check daily limits
+            const acc = {};
+            parsedLeads.forEach(l => {
+                const day = l.prospectingDay || 'Segunda-feira'; // Default
+                acc[day] = (acc[day] || 0) + 1;
+            });
 
-        // Get current counts from DB (approximation or pass as prop if needed, fetching here for safety)
-        const allClients = await db.getAll('clients');
+            // Get current counts from DB (approximation or pass as prop if needed, fetching here for safety)
+            const allClients = await db.getAll('clients');
 
-        for (const [day, count] of Object.entries(acc)) {
-            const currentCount = allClients.filter(c => c.prospectingDay === day).length;
-            if (currentCount + count > 30) {
-                alert(`Erro: O dia ${day} já tem ${currentCount} leads. Com essa importação passaria do limite de 30.`);
-                return;
+            for (const [day, count] of Object.entries(acc)) {
+                const currentCount = allClients.filter(c => c.prospectingDay === day).length;
+                if (currentCount + count > 30) {
+                    alert(`Erro: O dia ${day} já tem ${currentCount} leads. Com essa importação passaria do limite de 30.`);
+                    setIsProcessing(false);
+                    return;
+                }
             }
+
+            await Promise.all(parsedLeads.map(lead =>
+                db.add('clients', {
+                    ...lead,
+                    status: 'Prospecção',
+                    category: 'Frio',
+                    prospectingDay: lead.prospectingDay || 'Segunda-feira', // Default day if AI didn't catch it
+                    lastInteraction: new Date().toLocaleDateString('en-CA'), // ISO format
+                    ownerId: user?.id
+                })
+            ));
+
+            onSave();
+            onClose();
+        } catch (error) {
+            console.error("Erro na confirmação da importação:", error);
+            alert(`Falha ao salvar no banco de dados: ${error.message}`);
+        } finally {
+            setIsProcessing(false);
         }
-
-        await Promise.all(parsedLeads.map(lead =>
-            db.add('clients', {
-                ...lead,
-                status: 'Prospecção',
-                category: 'Frio',
-                prospectingDay: 'Segunda-feira', // Default day if AI didn't catch it
-                prospectingDay: 'Segunda-feira', // Default day if AI didn't catch it
-                lastInteraction: new Date().toLocaleDateString('pt-BR'),
-                ownerId: user.id
-            })
-        ));
-
-        onSave();
-        onClose();
     };
 
     const handleFileUpload = (e) => {
