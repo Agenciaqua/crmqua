@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { Calendar as CalendarIcon, Clock, User, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Phone, FileSignature, Edit, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Phone, FileSignature, Edit, Trash2, CheckCircle } from 'lucide-react';
 import { db } from '../services/database';
 import AddMeetingModal from '../components/AddMeetingModal';
 
-const CalendarView = ({ meetings, onDateClick, onMeetingClick }) => {
+const CalendarView = ({ meetings, onDateClick, onMeetingClick, onCompleteMeeting }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const getDaysInMonth = (date) => {
@@ -80,17 +80,31 @@ const CalendarView = ({ meetings, onDateClick, onMeetingClick }) => {
                                         onClick={(e) => { e.stopPropagation(); onMeetingClick(m); }}
                                         style={{
                                             fontSize: '0.65rem',
-                                            background: 'var(--glass-bg)',
+                                            background: m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.1)' : 'var(--glass-bg)',
                                             padding: '4px',
                                             borderRadius: '4px',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
-                                            borderLeft: '2px solid var(--color-orange)'
+                                            borderLeft: `2px solid ${m.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)'}`,
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            color: m.status === 'Realizada' ? '#888' : 'white',
+                                            textDecoration: m.status === 'Realizada' ? 'line-through' : 'none'
                                         }}
                                         title={`${m.time} - ${m.title}`}
                                     >
-                                        {m.time} {m.title}
+                                        <span>{m.time} {m.title}</span>
+                                        {m.status !== 'Realizada' && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m); }}
+                                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: 0 }}
+                                                title="Marcar como Realizada"
+                                            >
+                                                <CheckCircle size={10} />
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                                 {dayMeetings.length > 3 && <div style={{ fontSize: '0.65rem', color: '#888', textAlign: 'center' }}>+ {dayMeetings.length - 3} mais</div>}
@@ -144,6 +158,13 @@ export default function Meetings() {
     const handleDelete = async (id) => {
         if (window.confirm('Excluir este agendamento?')) {
             await db.delete('meetings', id);
+            refreshData();
+        }
+    };
+
+    const handleCompleteMeeting = async (meeting) => {
+        if (window.confirm(`Marcar a reunião "${meeting.title}" como realizada? Isso contará nos seus relatórios.`)) {
+            await db.update('meetings', meeting.id, { status: 'Realizada' });
             refreshData();
         }
     };
@@ -218,13 +239,13 @@ export default function Meetings() {
             {viewMode === 'list' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {filteredMeetings.length > 0 ? filteredMeetings.map(m => (
-                        <div key={m.id} className="glass-panel glass-panel-interactive" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div key={m.id} className="glass-panel glass-panel-interactive" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: m.status === 'Realizada' ? 0.6 : 1 }}>
                             <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                                 <div style={{
-                                    padding: '15px', background: 'rgba(255, 77, 0, 0.1)', borderRadius: '15px',
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', border: '1px solid rgba(255, 77, 0, 0.2)'
+                                    padding: '15px', background: m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 77, 0, 0.1)', borderRadius: '15px',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', border: `1px solid ${m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 77, 0, 0.2)'}`
                                 }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-orange)', textTransform: 'uppercase' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: m.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase' }}>
                                         {(() => {
                                             try {
                                                 const d = m.date ? new Date(m.date.substring(0, 10) + 'T12:00:00') : new Date();
@@ -238,11 +259,14 @@ export default function Meetings() {
                                 </div>
 
                                 <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{m.title}</h3>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '600', textDecoration: m.status === 'Realizada' ? 'line-through' : 'none', color: m.status === 'Realizada' ? '#888' : 'white' }}>{m.title}</h3>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', color: '#AAA' }}>
                                             {getTypeIcon(m.type)} {m.type}
                                         </div>
+                                        {m.status === 'Realizada' && (
+                                            <span style={{ fontSize: '0.7rem', color: '#4CAF50', backgroundColor: 'rgba(76, 175, 80, 0.1)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>Realizada</span>
+                                        )}
                                     </div>
                                     <div style={{ display: 'flex', gap: '20px', color: '#888', fontSize: '0.9rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {getClientName(m.clientId)}</div>
@@ -252,6 +276,9 @@ export default function Meetings() {
                             </div>
 
                             <div style={{ display: 'flex', gap: '10px' }}>
+                                {m.status !== 'Realizada' && (
+                                    <button onClick={() => handleCompleteMeeting(m)} className="btn-ghost" title="Marcar como Realizada" style={{ color: '#4CAF50' }}><CheckCircle size={18} /></button>
+                                )}
                                 <button onClick={() => { setEditingMeeting(m); setIsModalOpen(true); }} className="btn-ghost" title="Editar"><Edit size={18} /></button>
                                 <button onClick={() => handleDelete(m.id)} className="btn-ghost" title="Excluir"><Trash2 size={18} color="#ff4d4d" /></button>
                             </div>
@@ -268,6 +295,7 @@ export default function Meetings() {
                     meetings={meetings}
                     onDateClick={handleDateClick}
                     onMeetingClick={(m) => { setEditingMeeting(m); setIsModalOpen(true); }}
+                    onCompleteMeeting={handleCompleteMeeting}
                 />
             )}
 

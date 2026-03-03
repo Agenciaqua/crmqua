@@ -228,6 +228,13 @@ export default function Dashboard() {
         refreshData();
     };
 
+    const handleCompleteMeeting = async (meeting) => {
+        if (window.confirm(`Marcar a reunião "${meeting.title}" como realizada e registrar nos relatórios?`)) {
+            await db.update('meetings', meeting.id, { status: 'Realizada' });
+            refreshData();
+        }
+    };
+
     const isIOS = () => {
         return /iPhone|iPad|iPod/i.test(navigator.userAgent);
     };
@@ -330,15 +337,17 @@ export default function Dashboard() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {upcomingMeetings.length > 0 ? upcomingMeetings.map(meeting => (
                                 <div key={meeting.id} style={{
-                                    background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px',
-                                    border: '1px solid rgba(255,255,255,0.05)', transition: '0.2s',
-                                    display: 'flex', gap: '12px'
+                                    background: meeting.status === 'Realizada' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(255,255,255,0.03)',
+                                    padding: '12px', borderRadius: '12px',
+                                    border: meeting.status === 'Realizada' ? '1px solid rgba(76, 175, 80, 0.2)' : '1px solid rgba(255,255,255,0.05)',
+                                    transition: '0.2s', display: 'flex', gap: '12px', alignItems: 'center',
+                                    opacity: meeting.status === 'Realizada' ? 0.6 : 1
                                 }}>
                                     <div style={{
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                         padding: '0 10px', borderRight: '1px solid rgba(255,255,255,0.1)', minWidth: '50px'
                                     }}>
-                                        <span style={{ fontSize: '0.7rem', color: 'var(--color-orange)', textTransform: 'uppercase', fontWeight: '700' }}>
+                                        <span style={{ fontSize: '0.7rem', color: meeting.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase', fontWeight: '700' }}>
                                             {(() => {
                                                 try {
                                                     const d = meeting.date ? new Date(meeting.date.substring(0, 10) + 'T12:00:00') : new Date();
@@ -351,11 +360,21 @@ export default function Dashboard() {
                                         </span>
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px' }}>{meeting.title}</div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px', textDecoration: meeting.status === 'Realizada' ? 'line-through' : 'none', color: meeting.status === 'Realizada' ? '#888' : 'white' }}>{meeting.title}</div>
                                         <div style={{ fontSize: '0.75rem', color: '#AAA', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <Clock size={12} /> {meeting.time} ({meeting.duration})
+                                            {meeting.status === 'Realizada' && <span style={{ color: '#4CAF50', marginLeft: 'auto' }}>Realizada</span>}
                                         </div>
                                     </div>
+                                    {meeting.status !== 'Realizada' && (
+                                        <button
+                                            onClick={() => handleCompleteMeeting(meeting)}
+                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: '8px' }}
+                                            title="Marcar como Realizada"
+                                        >
+                                            <CheckCircle size={20} />
+                                        </button>
+                                    )}
                                 </div>
                             )) : (
                                 <div style={{ textAlign: 'center', color: '#666', padding: '20px 0', fontSize: '0.9rem', fontStyle: 'italic' }}>
