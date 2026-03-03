@@ -136,12 +136,17 @@ export default function Meetings() {
             db.getAll('meetings'),
             db.getAll('clients')
         ]);
-        setMeetings(allMeetings.sort((a, b) => {
+        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+
+        const userMeetings = allMeetings.filter(m => String(m.assigneeId) === String(user.id) || String(m.ownerId) === String(user.id));
+        const userClients = allClients.filter(c => String(c.ownerId) === String(user.id));
+
+        setMeetings(userMeetings.sort((a, b) => {
             const da = a.date ? a.date.substring(0, 10) : '0000-00-00';
             const db = b.date ? b.date.substring(0, 10) : '0000-00-00';
             return (da + a.time).localeCompare(db + b.time);
         }));
-        setClients(allClients);
+        setClients(userClients);
     };
 
     const handleSaveMeeting = async (meeting) => {

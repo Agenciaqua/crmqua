@@ -18,12 +18,17 @@ export default function Clients() {
 
     const refreshClients = async () => {
         const allClients = await db.getAll('clients');
+        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+
+        // Filter clients for the current user only
+        const userClients = allClients.filter(c => String(c.ownerId) === String(user.id));
+
         // Ensure legacy data works by defaulting to 'Lead' if relationship is missing
-        const processedClients = allClients.map(c => ({
+        const processedClients = userClients.map(c => ({
             ...c,
             relationship: c.relationship || 'Lead'
         }));
-        setClients(processedClients);
+        setClients(processedClients.sort((a, b) => new Date(b.created_at || Date.now()) - new Date(a.created_at || Date.now())));
     };
 
     const handleSaveClient = async (clientData) => {

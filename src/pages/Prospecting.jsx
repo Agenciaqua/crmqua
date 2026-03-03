@@ -17,12 +17,15 @@ const Prospecting = () => {
 
     const refreshData = async () => {
         const allClients = await db.getAll('clients');
+        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+
         // Filter specifically for leads in prospecting stage if needed, 
         // or just use the prospectingDay field. 
-        // For now, let's assume any lead with a prospectingDay is strictly for this board,
-        // OR we can make this board manage ALL leads but grouped by day.
         // Let's filter by status "Prospecção" OR those that have a day assigned.
-        const prospectingLeads = allClients.filter(c => c.prospectingDay || c.status === 'Prospecção');
+        // AND ONLY for the current user ID
+        const prospectingLeads = allClients.filter(c =>
+            (c.prospectingDay || c.status === 'Prospecção') && String(c.ownerId) === String(user.id)
+        );
         setLeads(prospectingLeads);
     };
 

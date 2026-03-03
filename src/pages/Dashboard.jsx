@@ -109,24 +109,23 @@ export default function Dashboard() {
             const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
             const now = new Date();
 
-            // Filter upcoming meetings (today onwards)
-            // Filter upcoming meetings (today onwards)
+            // Filter clients for the current user only
+            const userClients = clients.filter(c => String(c.ownerId) === String(user.id));
+
+            // Filter tasks for current user only (Remove manager global view from Dashboard stats as requested)
+            const visibleTasks = tasks.filter(t => String(t.assigneeId) === String(user.id) || String(t.ownerId) === String(user.id));
+
+            // Filter upcoming meetings (today onwards) and ONLY for the current user
             const futureMeetings = meetings
-                .filter(m => m.date && m.date.substring(0, 10) >= todayStr)
+                .filter(m => (String(m.assigneeId) === String(user.id) || String(m.ownerId) === String(user.id)) && m.date && m.date.substring(0, 10) >= todayStr)
                 .sort((a, b) => {
                     const da = a.date ? a.date.substring(0, 10) : '0000-00-00';
                     const db = b.date ? b.date.substring(0, 10) : '0000-00-00';
                     return (da + a.time).localeCompare(db + b.time);
                 });
 
-            const activeClientsCount = clients.filter(c => c.relationship === 'Cliente' && c.status !== 'Inativo').length;
-            const activeLeadsCount = clients.filter(c => (c.relationship === 'Lead' || !c.relationship) && c.status !== 'Inativo').length;
-
-            // Task Permission Logic: Manager sees all in STATS, but "Para Hoje" should ONLY be their own tasks
-            const isManager = ['gestor', 'manager', 'admin'].includes(user.role?.toLowerCase());
-            const visibleTasks = isManager
-                ? tasks
-                : tasks.filter(t => t.assigneeId === user.id || t.ownerId === user.id);
+            const activeClientsCount = userClients.filter(c => c.relationship === 'Cliente' && c.status !== 'Inativo').length;
+            const activeLeadsCount = userClients.filter(c => (c.relationship === 'Lead' || !c.relationship) && c.status !== 'Inativo').length;
 
             setStats({
                 activeClients: activeClientsCount,
@@ -134,7 +133,7 @@ export default function Dashboard() {
                 pendingTasks: visibleTasks.filter(t => t.status === 'todo' || t.status === 'inprogress').length,
                 meetings: futureMeetings.length
             });
-            setRecentClients(clients.slice(-5).reverse());
+            setRecentClients(userClients.slice(-5).reverse());
 
             // Filter tasks for today that are NOT done/archived, and STRICTLY assigned to the user
             setTodaysTasks(tasks.filter(t =>
@@ -181,7 +180,7 @@ export default function Dashboard() {
 
                 let ignoredCount = 0;
 
-                const count = clients.filter(c => {
+                const count = userClients.filter(c => {
                     const clientDate = normalizeDate(c.lastInteraction);
                     const matchesDate = clientDate === targetDate;
                     // Filter: Must be a Lead (or undefined) AND have interaction on this date
