@@ -135,7 +135,7 @@ export default function Dashboard() {
                 activeClients: activeClientsCount,
                 activeLeads: activeLeadsCount,
                 pendingTasks: visibleTasks.filter(t => t.status === 'todo' || t.status === 'inprogress').length,
-                meetings: futureMeetings.length
+                meetings: futureMeetings.filter(m => m.status !== 'Realizada').length
             });
             setRecentClients(userClients.slice(-5).reverse());
 

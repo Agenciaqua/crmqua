@@ -63,14 +63,11 @@ export default function Reports() {
     }, [startDate, endDate, selectedUser, rawData]);
 
     const calculateMetrics = () => {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59); // End of day
-
         const isWithinRange = (dateStr) => {
             if (!dateStr) return false;
-            const d = new Date(dateStr);
-            return d >= start && d <= end;
+            // Robustly extract YYYY-MM-DD to prevent timezone shift issues
+            const dStr = dateStr.substring(0, 10);
+            return dStr >= startDate && dStr <= endDate;
         };
 
         const checkOwner = (item, idField = 'ownerId') => {
