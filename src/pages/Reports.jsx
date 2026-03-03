@@ -31,11 +31,21 @@ export default function Reports() {
 
     // Set default dates (last 30 days) on mount and fetch users
     useEffect(() => {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - 30);
-        setEndDate(end.toISOString().split('T')[0]);
-        setStartDate(start.toISOString().split('T')[0]);
+        const date = new Date();
+        const start = new Date(date.getFullYear(), date.getMonth(), 1);
+        const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        // Ensure browser timezone doesn't shift the day backwards if running late at night
+        // by formatting with local methods or simple ISO padding:
+        const formatDate = (d) => {
+            const yr = d.getFullYear();
+            const mo = String(d.getMonth() + 1).padStart(2, '0');
+            const dy = String(d.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${dy}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
 
         // Fetch users and all data
         const loadInternalData = async () => {
