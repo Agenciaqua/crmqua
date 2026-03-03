@@ -25,7 +25,7 @@ const Prospecting = () => {
         // AND strictly for the current user ID to avoid ghost leads
         const prospectingLeads = allClients.filter(c =>
             (c.prospectingDay || c.status === 'Prospecção') &&
-            ((c.ownerId && user.id && String(c.ownerId) === String(user.id)) || (!c.ownerId && user.role === 'Gestor'))
+            (c.ownerId && user.id && String(c.ownerId) === String(user.id))
         );
         setLeads(prospectingLeads);
     };

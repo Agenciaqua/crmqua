@@ -140,14 +140,12 @@ export default function Meetings() {
 
         const userMeetings = allMeetings.filter(m =>
             (m.assigneeId && user.id && String(m.assigneeId) === String(user.id)) ||
-            (m.ownerId && user.id && String(m.ownerId) === String(user.id)) ||
-            (!(m.assigneeId || m.ownerId) && user.role === 'Gestor')
+            (m.ownerId && user.id && String(m.ownerId) === String(user.id))
         );
 
         const userClients = allClients.filter(c =>
             (c.ownerId && user.id && String(c.ownerId) === String(user.id)) ||
-            c.status === 'Fechado' ||
-            (!c.ownerId && user.role === 'Gestor')
+            c.status === 'Fechado'
         );
 
         setMeetings(userMeetings.sort((a, b) => {

@@ -113,8 +113,7 @@ export default function Dashboard() {
             // Prevent undefined === undefined ghost matches
             const userClients = clients.filter(c =>
                 (c.ownerId && user.id && String(c.ownerId) === String(user.id)) ||
-                c.status === 'Fechado' ||
-                (!c.ownerId && user.role === 'Gestor') // Allow gestor to see unassigned legacy leads
+                c.status === 'Fechado'
             );
 
             // Filter tasks for current user only (Remove manager global view from Dashboard stats as requested)
