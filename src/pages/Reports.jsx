@@ -258,7 +258,7 @@ export default function Reports() {
                             Detalhamento de Performance
                         </h3>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '40px' }}>
                             {/* Task Stats */}
                             <div>
                                 <h4 style={{ color: '#888', marginBottom: '15px' }}>Tarefas</h4>
@@ -274,6 +274,25 @@ export default function Reports() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
                                         <span>Pendentes</span>
                                         <span style={{ color: '#FF4D4D' }}>{metrics.tasks.pending}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Meeting Stats */}
+                            <div>
+                                <h4 style={{ color: '#888', marginBottom: '15px' }}>Reuniões</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>Realizadas</span>
+                                        <span style={{ color: '#2196F3' }}>{Math.round((metrics.meetings.done / (metrics.meetings.total || 1)) * 100)}% ({metrics.meetings.done})</span>
+                                    </div>
+                                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${(metrics.meetings.done / (metrics.meetings.total || 1)) * 100}%`, height: '100%', background: '#2196F3' }}></div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                        <span>Agendadas</span>
+                                        <span style={{ color: '#FF9800' }}>{metrics.meetings.scheduled}</span>
                                     </div>
                                 </div>
                             </div>
