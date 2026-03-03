@@ -22,9 +22,10 @@ const Prospecting = () => {
         // Filter specifically for leads in prospecting stage if needed, 
         // or just use the prospectingDay field. 
         // Let's filter by status "Prospecção" OR those that have a day assigned.
-        // AND ONLY for the current user ID
+        // AND strictly for the current user ID to avoid ghost leads
         const prospectingLeads = allClients.filter(c =>
-            (c.prospectingDay || c.status === 'Prospecção') && String(c.ownerId) === String(user.id)
+            (c.prospectingDay || c.status === 'Prospecção') &&
+            ((c.ownerId && user.id && String(c.ownerId) === String(user.id)) || (!c.ownerId && user.role === 'Gestor'))
         );
         setLeads(prospectingLeads);
     };

@@ -20,8 +20,12 @@ export default function Clients() {
         const allClients = await db.getAll('clients');
         const user = JSON.parse(localStorage.getItem('crm_user')) || {};
 
-        // Filter clients for the current user only
-        const userClients = allClients.filter(c => String(c.ownerId) === String(user.id));
+        // Filter clients for the current user only, but allow Closed clients to remain visible
+        const userClients = allClients.filter(c =>
+            (c.ownerId && user.id && String(c.ownerId) === String(user.id)) ||
+            c.status === 'Fechado' ||
+            (!c.ownerId && user.role === 'Gestor')
+        );
 
         // Ensure legacy data works by defaulting to 'Lead' if relationship is missing
         const processedClients = userClients.map(c => ({

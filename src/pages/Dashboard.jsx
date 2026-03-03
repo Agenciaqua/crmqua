@@ -109,8 +109,13 @@ export default function Dashboard() {
             const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
             const now = new Date();
 
-            // Filter clients for the current user only
-            const userClients = clients.filter(c => String(c.ownerId) === String(user.id));
+            // Filter clients for the current user only or if they are "Fechados" (Closed)
+            // Prevent undefined === undefined ghost matches
+            const userClients = clients.filter(c =>
+                (c.ownerId && user.id && String(c.ownerId) === String(user.id)) ||
+                c.status === 'Fechado' ||
+                (!c.ownerId && user.role === 'Gestor') // Allow gestor to see unassigned legacy leads
+            );
 
             // Filter tasks for current user only (Remove manager global view from Dashboard stats as requested)
             const visibleTasks = tasks.filter(t => String(t.assigneeId) === String(user.id) || String(t.ownerId) === String(user.id));

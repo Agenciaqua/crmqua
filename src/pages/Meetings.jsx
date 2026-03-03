@@ -138,8 +138,17 @@ export default function Meetings() {
         ]);
         const user = JSON.parse(localStorage.getItem('crm_user')) || {};
 
-        const userMeetings = allMeetings.filter(m => String(m.assigneeId) === String(user.id) || String(m.ownerId) === String(user.id));
-        const userClients = allClients.filter(c => String(c.ownerId) === String(user.id));
+        const userMeetings = allMeetings.filter(m =>
+            (m.assigneeId && user.id && String(m.assigneeId) === String(user.id)) ||
+            (m.ownerId && user.id && String(m.ownerId) === String(user.id)) ||
+            (!(m.assigneeId || m.ownerId) && user.role === 'Gestor')
+        );
+
+        const userClients = allClients.filter(c =>
+            (c.ownerId && user.id && String(c.ownerId) === String(user.id)) ||
+            c.status === 'Fechado' ||
+            (!c.ownerId && user.role === 'Gestor')
+        );
 
         setMeetings(userMeetings.sort((a, b) => {
             const da = a.date ? a.date.substring(0, 10) : '0000-00-00';
