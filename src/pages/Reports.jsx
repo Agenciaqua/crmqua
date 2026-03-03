@@ -96,7 +96,9 @@ export default function Reports() {
             return String(m.assigneeId) === String(selectedUser) || String(m.ownerId) === String(selectedUser);
         };
         const meetingsInRange = rawData.meetings.filter(m => isWithinRange(m.date) && checkMeetingOwner(m));
-        const meetingsDone = meetingsInRange.filter(m => m.status === 'Realizada').length;
+        const doneStatuses = ['Realizada', 'Fechou', 'Não Fechou'];
+        const meetingsDone = meetingsInRange.filter(m => doneStatuses.includes(m.status)).length;
+        const meetingsClosed = meetingsInRange.filter(m => m.status === 'Fechou').length;
 
         // Clients (ownerId)
         const clientsInRange = rawData.clients.filter(c => isWithinRange(c.lastInteraction) && checkOwner(c, 'ownerId'));
@@ -114,6 +116,7 @@ export default function Reports() {
             meetings: {
                 total: meetingsInRange.length,
                 done: meetingsDone,
+                closed: meetingsClosed,
                 scheduled: meetingsInRange.length - meetingsDone
             },
             clients: {
@@ -288,6 +291,11 @@ export default function Reports() {
                                     </div>
                                     <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
                                         <div style={{ width: `${(metrics.meetings.done / (metrics.meetings.total || 1)) * 100}%`, height: '100%', background: '#2196F3' }}></div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                        <span>Fecharam Negócio</span>
+                                        <span style={{ color: '#4CAF50' }}>{Math.round((metrics.meetings.closed / (metrics.meetings.done || 1)) * 100)}% ({metrics.meetings.closed})</span>
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>

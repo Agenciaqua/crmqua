@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { db } from '../services/database';
-import { ArrowUpRight, ArrowDownRight, Users, CheckCircle, DollarSign, Activity, Plus, Upload, UserPlus, FileText, Calendar, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Users, CheckCircle, DollarSign, Activity, Plus, Upload, UserPlus, FileText, Calendar, Clock, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddClientModal from '../components/AddClientModal';
 import AddTaskModal from '../components/AddTaskModal';
+
+const isDone = (status) => ['Realizada', 'Fechou', 'Não Fechou'].includes(status);
 
 const data = [
     { name: 'Jan', vendas: 4000 },
@@ -135,7 +137,7 @@ export default function Dashboard() {
                 activeClients: activeClientsCount,
                 activeLeads: activeLeadsCount,
                 pendingTasks: visibleTasks.filter(t => t.status === 'todo' || t.status === 'inprogress').length,
-                meetings: futureMeetings.filter(m => m.status !== 'Realizada').length
+                meetings: futureMeetings.filter(m => !isDone(m.status)).length
             });
             setRecentClients(userClients.slice(-5).reverse());
 
@@ -231,9 +233,12 @@ export default function Dashboard() {
         refreshData();
     };
 
-    const handleCompleteMeeting = async (meeting) => {
-        if (window.confirm(`Marcar a reunião "${meeting.title}" como realizada e registrar nos relatórios?`)) {
-            await db.update('meetings', meeting.id, { status: 'Realizada' });
+    const handleCompleteMeeting = async (meeting, outcome) => {
+        const title = outcome === 'Fechou'
+            ? `Marcar a reunião "${meeting.title}" como REALIZADA COM SUCESSO e registrar nos relatórios?`
+            : `Marcar a reunião "${meeting.title}" como REALIZADA SEM FECHAR?`;
+        if (window.confirm(title)) {
+            await db.update('meetings', meeting.id, { status: outcome });
             refreshData();
         }
     };
@@ -340,17 +345,17 @@ export default function Dashboard() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {upcomingMeetings.length > 0 ? upcomingMeetings.map(meeting => (
                                 <div key={meeting.id} style={{
-                                    background: meeting.status === 'Realizada' ? 'rgba(76, 175, 80, 0.05)' : 'rgba(255,255,255,0.03)',
+                                    background: isDone(meeting.status) ? 'rgba(76, 175, 80, 0.05)' : 'rgba(255,255,255,0.03)',
                                     padding: '12px', borderRadius: '12px',
-                                    border: meeting.status === 'Realizada' ? '1px solid rgba(76, 175, 80, 0.2)' : '1px solid rgba(255,255,255,0.05)',
+                                    border: isDone(meeting.status) ? '1px solid rgba(76, 175, 80, 0.2)' : '1px solid rgba(255,255,255,0.05)',
                                     transition: '0.2s', display: 'flex', gap: '12px', alignItems: 'center',
-                                    opacity: meeting.status === 'Realizada' ? 0.6 : 1
+                                    opacity: isDone(meeting.status) ? 0.6 : 1
                                 }}>
                                     <div style={{
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                         padding: '0 10px', borderRight: '1px solid rgba(255,255,255,0.1)', minWidth: '50px'
                                     }}>
-                                        <span style={{ fontSize: '0.7rem', color: meeting.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase', fontWeight: '700' }}>
+                                        <span style={{ fontSize: '0.7rem', color: isDone(meeting.status) ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase', fontWeight: '700' }}>
                                             {(() => {
                                                 try {
                                                     const d = meeting.date ? new Date(meeting.date.substring(0, 10) + 'T12:00:00') : new Date();
@@ -363,20 +368,29 @@ export default function Dashboard() {
                                         </span>
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px', textDecoration: meeting.status === 'Realizada' ? 'line-through' : 'none', color: meeting.status === 'Realizada' ? '#888' : 'white' }}>{meeting.title}</div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '4px', textDecoration: isDone(meeting.status) ? 'line-through' : 'none', color: isDone(meeting.status) ? '#888' : 'white' }}>{meeting.title}</div>
                                         <div style={{ fontSize: '0.75rem', color: '#AAA', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <Clock size={12} /> {meeting.time} ({meeting.duration})
-                                            {meeting.status === 'Realizada' && <span style={{ color: '#4CAF50', marginLeft: 'auto' }}>Realizada</span>}
+                                            {isDone(meeting.status) && <span style={{ color: meeting.status === 'Não Fechou' ? '#f44336' : '#4CAF50', marginLeft: 'auto' }}>{meeting.status === 'Fechou' ? 'Fechou Negócio' : (meeting.status === 'Não Fechou' ? 'Não Fechou' : 'Realizada')}</span>}
                                         </div>
                                     </div>
-                                    {meeting.status !== 'Realizada' && (
-                                        <button
-                                            onClick={() => handleCompleteMeeting(meeting)}
-                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: '8px' }}
-                                            title="Marcar como Realizada"
-                                        >
-                                            <CheckCircle size={20} />
-                                        </button>
+                                    {!isDone(meeting.status) && (
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={() => handleCompleteMeeting(meeting, 'Fechou')}
+                                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: '8px' }}
+                                                title="Fechou Negócio"
+                                            >
+                                                <CheckCircle size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleCompleteMeeting(meeting, 'Não Fechou')}
+                                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#f44336', padding: '8px' }}
+                                                title="Não Fechou"
+                                            >
+                                                <XCircle size={20} />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             )) : (

@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { Calendar as CalendarIcon, Clock, User, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Phone, FileSignature, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Plus, Search, ChevronLeft, ChevronRight, Video, MapPin, Phone, FileSignature, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { db } from '../services/database';
 import AddMeetingModal from '../components/AddMeetingModal';
+
+const isDone = (status) => ['Realizada', 'Fechou', 'Não Fechou'].includes(status);
 
 const CalendarView = ({ meetings, onDateClick, onMeetingClick, onCompleteMeeting }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -80,30 +82,39 @@ const CalendarView = ({ meetings, onDateClick, onMeetingClick, onCompleteMeeting
                                         onClick={(e) => { e.stopPropagation(); onMeetingClick(m); }}
                                         style={{
                                             fontSize: '0.65rem',
-                                            background: m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.1)' : 'var(--glass-bg)',
+                                            background: isDone(m.status) ? 'rgba(76, 175, 80, 0.1)' : 'var(--glass-bg)',
                                             padding: '4px',
                                             borderRadius: '4px',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
-                                            borderLeft: `2px solid ${m.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)'}`,
+                                            borderLeft: `2px solid ${isDone(m.status) ? '#4CAF50' : 'var(--color-orange)'}`,
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            color: m.status === 'Realizada' ? '#888' : 'white',
-                                            textDecoration: m.status === 'Realizada' ? 'line-through' : 'none'
+                                            color: isDone(m.status) ? '#888' : 'white',
+                                            textDecoration: isDone(m.status) ? 'line-through' : 'none'
                                         }}
                                         title={`${m.time} - ${m.title}`}
                                     >
                                         <span>{m.time} {m.title}</span>
-                                        {m.status !== 'Realizada' && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m); }}
-                                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: 0 }}
-                                                title="Marcar como Realizada"
-                                            >
-                                                <CheckCircle size={10} />
-                                            </button>
+                                        {!isDone(m.status) && (
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Fechou'); }}
+                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: 0 }}
+                                                    title="Fechou Negócio"
+                                                >
+                                                    <CheckCircle size={12} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Não Fechou'); }}
+                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#f44336', padding: 0 }}
+                                                    title="Não Fechou"
+                                                >
+                                                    <XCircle size={12} />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 ))}
@@ -174,9 +185,16 @@ export default function Meetings() {
         }
     };
 
-    const handleCompleteMeeting = async (meeting) => {
-        if (window.confirm(`Marcar a reunião "${meeting.title}" como realizada? Isso contará nos seus relatórios.`)) {
-            await db.update('meetings', meeting.id, { status: 'Realizada' });
+    const handleCompleteMeeting = async (meeting, outcome) => {
+        const title = outcome === 'Fechou'
+            ? `Marcar a reunião "${meeting.title}" como REALIZADA COM SUCESSO (Cliente Fechou)?`
+            : `Marcar a reunião "${meeting.title}" como REALIZADA (Não Fechou)?`;
+        if (window.confirm(title)) {
+            await db.update('meetings', meeting.id, { status: outcome });
+            if (outcome === 'Fechou' && meeting.clientId) {
+                const client = clients.find(c => c.id === meeting.clientId);
+                if (client) await db.update('clients', meeting.clientId, { status: 'Fechado' });
+            }
             refreshData();
         }
     };
@@ -251,13 +269,13 @@ export default function Meetings() {
             {viewMode === 'list' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {filteredMeetings.length > 0 ? filteredMeetings.map(m => (
-                        <div key={m.id} className="glass-panel glass-panel-interactive" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: m.status === 'Realizada' ? 0.6 : 1 }}>
+                        <div key={m.id} className="glass-panel glass-panel-interactive" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: isDone(m.status) ? 0.6 : 1 }}>
                             <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                                 <div style={{
-                                    padding: '15px', background: m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 77, 0, 0.1)', borderRadius: '15px',
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', border: `1px solid ${m.status === 'Realizada' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 77, 0, 0.2)'}`
+                                    padding: '15px', background: isDone(m.status) ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 77, 0, 0.1)', borderRadius: '15px',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px', border: `1px solid ${isDone(m.status) ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 77, 0, 0.2)'}`
                                 }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: m.status === 'Realizada' ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: isDone(m.status) ? '#4CAF50' : 'var(--color-orange)', textTransform: 'uppercase' }}>
                                         {(() => {
                                             try {
                                                 const d = m.date ? new Date(m.date.substring(0, 10) + 'T12:00:00') : new Date();
@@ -272,12 +290,14 @@ export default function Meetings() {
 
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '600', textDecoration: m.status === 'Realizada' ? 'line-through' : 'none', color: m.status === 'Realizada' ? '#888' : 'white' }}>{m.title}</h3>
+                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '600', textDecoration: isDone(m.status) ? 'line-through' : 'none', color: isDone(m.status) ? '#888' : 'white' }}>{m.title}</h3>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', color: '#AAA' }}>
                                             {getTypeIcon(m.type)} {m.type}
                                         </div>
-                                        {m.status === 'Realizada' && (
-                                            <span style={{ fontSize: '0.7rem', color: '#4CAF50', backgroundColor: 'rgba(76, 175, 80, 0.1)', padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(76, 175, 80, 0.2)' }}>Realizada</span>
+                                        {isDone(m.status) && (
+                                            <span style={{ fontSize: '0.7rem', color: m.status === 'Não Fechou' ? '#f44336' : '#4CAF50', backgroundColor: m.status === 'Não Fechou' ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)', padding: '2px 8px', borderRadius: '12px', border: `1px solid ${m.status === 'Não Fechou' ? 'rgba(244, 67, 54, 0.2)' : 'rgba(76, 175, 80, 0.2)'}` }}>
+                                                {m.status === 'Fechou' ? 'Fechou Negócio' : (m.status === 'Não Fechou' ? 'Não Fechou' : 'Realizada')}
+                                            </span>
                                         )}
                                     </div>
                                     <div style={{ display: 'flex', gap: '20px', color: '#888', fontSize: '0.9rem' }}>
@@ -288,8 +308,11 @@ export default function Meetings() {
                             </div>
 
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                {m.status !== 'Realizada' && (
-                                    <button onClick={() => handleCompleteMeeting(m)} className="btn-ghost" title="Marcar como Realizada" style={{ color: '#4CAF50' }}><CheckCircle size={18} /></button>
+                                {!isDone(m.status) && (
+                                    <>
+                                        <button onClick={() => handleCompleteMeeting(m, 'Fechou')} className="btn-ghost" title="Fechou Negócio" style={{ color: '#4CAF50' }}><CheckCircle size={18} /></button>
+                                        <button onClick={() => handleCompleteMeeting(m, 'Não Fechou')} className="btn-ghost" title="Não Fechou" style={{ color: '#f44336' }}><XCircle size={18} /></button>
+                                    </>
                                 )}
                                 <button onClick={() => { setEditingMeeting(m); setIsModalOpen(true); }} className="btn-ghost" title="Editar"><Edit size={18} /></button>
                                 <button onClick={() => handleDelete(m.id)} className="btn-ghost" title="Excluir"><Trash2 size={18} color="#ff4d4d" /></button>
