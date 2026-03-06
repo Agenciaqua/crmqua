@@ -173,10 +173,10 @@ export default function Reports() {
                         <p style={{ color: '#888' }}>Visão geral do desempenho do sistema</p>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>
+                    <div className="flex-mobile-col" style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px', flexWrap: 'wrap' }}>
 
                         {/* User Filter */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '12px' }}>
                             <Users size={16} color="#888" />
                             <select
                                 value={selectedUser}
