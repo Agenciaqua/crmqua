@@ -86,7 +86,7 @@ const AddLeadModal = ({ onClose, onSave, initialData }) => {
             background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-            <div className="glass-panel" style={{ width: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ width: '95vw', maxWidth: '500px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{initialData ? 'Editar Lead' : 'Novo Lead Manual'}</h2>
                     <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}><X /></button>

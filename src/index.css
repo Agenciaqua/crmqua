@@ -54,6 +54,54 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+@media (max-width: 768px) {
+    /* Layout Adjustments */
+    main {
+        padding-top: 60px !important;
+        /* Space for menu button */
+    }
+
+    .responsive-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .mobile-col {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .hide-mobile {
+        display: none !important;
+    }
+
+    /* Kanbans & Tables Scroll Fix - CRITICAL for preventing page overflow */
+    div[style*="overflowX: auto"],
+    .table-container,
+    .overflow-auto-mobile {
+        width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+    }
+
+    /* Enforcement of no horizontal scroll on body */
+    body,
+    #root,
+    .layout-wrapper {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .glass-panel {
+        padding: 16px !important;
+    }
+
+    /* Adjust text sizes for mobile */
+    h1 {
+        font-size: 1.8rem !important;
+    }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

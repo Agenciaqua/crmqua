@@ -21,7 +21,7 @@ export default function ProfileModal({ onClose }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
             <div className="glass-panel" style={{
-                padding: '30px', width: '400px',
+                padding: '30px', width: '95vw', maxWidth: '400px',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
             }}>

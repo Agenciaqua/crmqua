@@ -328,7 +328,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Right Column - Tasks & Leads */}
-                <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
                     {/* UPCOMING APPOINTMENTS WIDGET */}
                     <div className="glass-panel" style={{ padding: '24px', border: '1px solid rgba(255, 77, 0, 0.3)' }}>

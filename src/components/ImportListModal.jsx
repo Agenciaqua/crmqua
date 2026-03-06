@@ -155,7 +155,7 @@ const ImportListModal = ({ onClose, onSave }) => {
             background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-            <div className="glass-panel" style={{ width: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ width: '95vw', maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Sparkles color="var(--color-orange)" /> Importar Lista com IA

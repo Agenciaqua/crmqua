@@ -45,84 +45,88 @@ const CalendarView = ({ meetings, onDateClick, onMeetingClick, onCompleteMeeting
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '10px', color: '#888' }}>
-                {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'].map(d => <div key={d} style={{ padding: '10px' }}>{d}</div>)}
-            </div>
+            <div className="overflow-auto-mobile">
+                <div style={{ minWidth: '700px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: '10px', color: '#888' }}>
+                        {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'].map(d => <div key={d} style={{ padding: '10px' }}>{d}</div>)}
+                    </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
-                {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
-                {Array.from({ length: days }).map((_, i) => {
-                    const day = i + 1;
-                    const dayMeetings = getMeetingsForDay(day);
-                    const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
-                    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
+                        {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+                        {Array.from({ length: days }).map((_, i) => {
+                            const day = i + 1;
+                            const dayMeetings = getMeetingsForDay(day);
+                            const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
+                            const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-                    return (
-                        <div
-                            key={day}
-                            onClick={() => onDateClick(dateStr)}
-                            style={{
-                                minHeight: '100px',
-                                border: '1px solid rgba(255,255,255,0.05)',
-                                borderRadius: '12px',
-                                background: isToday ? 'rgba(255, 77, 0, 0.05)' : 'rgba(255,255,255,0.02)',
-                                padding: '10px',
-                                cursor: 'pointer',
-                                transition: '0.2s',
-                                position: 'relative'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--color-orange)'}
-                            onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
-                        >
-                            <div style={{ textAlign: 'right', marginBottom: '5px', color: isToday ? 'var(--color-orange)' : '#666', fontWeight: isToday ? '700' : '400' }}>{day}</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {dayMeetings.slice(0, 3).map(m => (
-                                    <div
-                                        key={m.id}
-                                        onClick={(e) => { e.stopPropagation(); onMeetingClick(m); }}
-                                        style={{
-                                            fontSize: '0.65rem',
-                                            background: isDone(m.status) ? 'rgba(76, 175, 80, 0.1)' : 'var(--glass-bg)',
-                                            padding: '4px',
-                                            borderRadius: '4px',
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            borderLeft: `2px solid ${isDone(m.status) ? '#4CAF50' : 'var(--color-orange)'}`,
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            color: isDone(m.status) ? '#888' : 'white',
-                                            textDecoration: isDone(m.status) ? 'line-through' : 'none'
-                                        }}
-                                        title={`${m.time} - ${m.title}`}
-                                    >
-                                        <span>{m.time} {m.title}</span>
-                                        {!isDone(m.status) && (
-                                            <div style={{ display: 'flex', gap: '4px' }}>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Fechou'); }}
-                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: 0 }}
-                                                    title="Fechou Negócio"
-                                                >
-                                                    <CheckCircle size={12} />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Não Fechou'); }}
-                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#f44336', padding: 0 }}
-                                                    title="Não Fechou"
-                                                >
-                                                    <XCircle size={12} />
-                                                </button>
+                            return (
+                                <div
+                                    key={day}
+                                    onClick={() => onDateClick(dateStr)}
+                                    style={{
+                                        minHeight: '100px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        borderRadius: '12px',
+                                        background: isToday ? 'rgba(255, 77, 0, 0.05)' : 'rgba(255,255,255,0.02)',
+                                        padding: '10px',
+                                        cursor: 'pointer',
+                                        transition: '0.2s',
+                                        position: 'relative'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--color-orange)'}
+                                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}
+                                >
+                                    <div style={{ textAlign: 'right', marginBottom: '5px', color: isToday ? 'var(--color-orange)' : '#666', fontWeight: isToday ? '700' : '400' }}>{day}</div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        {dayMeetings.slice(0, 3).map(m => (
+                                            <div
+                                                key={m.id}
+                                                onClick={(e) => { e.stopPropagation(); onMeetingClick(m); }}
+                                                style={{
+                                                    fontSize: '0.65rem',
+                                                    background: isDone(m.status) ? 'rgba(76, 175, 80, 0.1)' : 'var(--glass-bg)',
+                                                    padding: '4px',
+                                                    borderRadius: '4px',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    borderLeft: `2px solid ${isDone(m.status) ? '#4CAF50' : 'var(--color-orange)'}`,
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    color: isDone(m.status) ? '#888' : 'white',
+                                                    textDecoration: isDone(m.status) ? 'line-through' : 'none'
+                                                }}
+                                                title={`${m.time} - ${m.title}`}
+                                            >
+                                                <span>{m.time} {m.title}</span>
+                                                {!isDone(m.status) && (
+                                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Fechou'); }}
+                                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#4CAF50', padding: 0 }}
+                                                            title="Fechou Negócio"
+                                                        >
+                                                            <CheckCircle size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); onCompleteMeeting(m, 'Não Fechou'); }}
+                                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#f44336', padding: 0 }}
+                                                            title="Não Fechou"
+                                                        >
+                                                            <XCircle size={12} />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        ))}
+                                        {dayMeetings.length > 3 && <div style={{ fontSize: '0.65rem', color: '#888', textAlign: 'center' }}>+ {dayMeetings.length - 3} mais</div>}
                                     </div>
-                                ))}
-                                {dayMeetings.length > 3 && <div style={{ fontSize: '0.65rem', color: '#888', textAlign: 'center' }}>+ {dayMeetings.length - 3} mais</div>}
-                            </div>
-                        </div>
-                    );
-                })}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
         </div>
     );

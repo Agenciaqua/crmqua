@@ -7,13 +7,13 @@ const Layout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
-        <div style={{
+        <div className="layout-wrapper" style={{
             display: 'flex',
             minHeight: '100vh',
             overflow: 'hidden',
-            padding: '20px',
-            gap: '20px',
-            position: 'relative'
+            padding: '10px',
+            gap: '10px',
+            position: 'relative',
         }}>
             {/* Mobile Menu Button */}
             <button
@@ -31,14 +31,14 @@ const Layout = ({ children }) => {
 
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-            <main style={{
+            <main className="main-content" style={{
                 flex: 1,
                 overflowY: 'auto',
                 position: 'relative',
                 borderRadius: '24px',
                 display: 'flex',
                 flexDirection: 'column',
-                height: 'calc(100vh - 40px)'
+                height: 'calc(100vh - 20px)'
             }}>
                 {children}
             </main>
