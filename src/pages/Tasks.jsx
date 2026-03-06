@@ -242,9 +242,9 @@ export default function Tasks() {
                 )}
             </div>
 
-            <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', paddingBottom: '20px', height: '100%' }}>
+            <div className="flex-mobile-col" style={{ display: 'flex', gap: '24px', paddingBottom: '20px', height: '100%' }}>
                 {columns.map(([key, label, Icon, color]) => (
-                    <div key={key} style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column' }}>
+                    <div className="kanban-col" key={key} style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', paddingLeft: '10px' }}>
                             <Icon size={20} color={color} />
                             <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: color }}>{label}</h3>

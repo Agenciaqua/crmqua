@@ -132,12 +132,12 @@ const Prospecting = () => {
                 </div>
             </div>
 
-            <div style={{
+            <div className="prospecting-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, minmax(300px, 1fr))',
                 gap: '16px',
                 height: 'calc(100vh - 200px)',
-                overflowX: 'auto',
+                overflowX: 'hidden',
                 paddingBottom: '20px'
             }}>
                 {DAYS.map(day => (
