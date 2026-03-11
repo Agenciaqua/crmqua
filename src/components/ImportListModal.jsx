@@ -106,9 +106,15 @@ const ImportListModal = ({ onClose, onSave }) => {
             const allClients = await db.getAll('clients');
 
             for (const [day, count] of Object.entries(acc)) {
-                const currentCount = allClients.filter(c => c.prospectingDay === day).length;
+                // FIX: Only count leads for the CURRENT USER to avoid "ghost leads" blocking imports
+                const currentCount = allClients.filter(c => 
+                    c.prospectingDay === day && 
+                    String(c.ownerId) === String(user?.id) &&
+                    c.status === 'Prospecção'
+                ).length;
+
                 if (currentCount + count > 30) {
-                    alert(`Erro: O dia ${day} já tem ${currentCount} leads. Com essa importação passaria do limite de 30.`);
+                    alert(`Erro: Você já tem ${currentCount} leads na ${day}. Com essa importação passaria do seu limite de 30.`);
                     setIsProcessing(false);
                     return;
                 }

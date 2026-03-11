@@ -47,9 +47,15 @@ const AddLeadModal = ({ onClose, onSave, initialData }) => {
         // Check Limit if creating new or changing day
         if (formData.prospectingDay && (!initialData || initialData.prospectingDay !== formData.prospectingDay)) {
             const allClients = await db.getAll('clients');
-            const dayLeads = allClients.filter(c => c.prospectingDay === formData.prospectingDay).length;
+            // FIX: Only count leads for the CURRENT USER to avoid "ghost leads" from other accounts
+            const dayLeads = allClients.filter(c => 
+                c.prospectingDay === formData.prospectingDay && 
+                String(c.ownerId) === String(user.id) &&
+                c.status === 'Prospecção'
+            ).length;
+
             if (dayLeads >= 30) {
-                alert(`O dia ${formData.prospectingDay} já atingiu o limite de 30 leads. Escolha outro dia.`);
+                alert(`O dia ${formData.prospectingDay} já atingiu o limite de 30 leads para sua conta. Escolha outro dia.`);
                 return;
             }
         }

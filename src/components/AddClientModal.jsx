@@ -34,6 +34,7 @@ const AddClientModal = ({ onClose, onSave, initialData }) => {
 
         onSave({
             ...formData,
+            prospectingDay: null, // CLEAR from prospecting board if edited here
             lastInteraction: initialData?.lastInteraction || todayISO,
             ownerId: initialData?.ownerId || user?.id
         });

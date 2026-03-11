@@ -19,15 +19,21 @@ const Prospecting = () => {
         const allClients = await db.getAll('clients');
         const user = JSON.parse(localStorage.getItem('crm_user')) || {};
 
-        // Filter specifically for leads in prospecting stage if needed, 
-        // or just use the prospectingDay field. 
-        // Let's filter by status "Prospecção" OR those that have a day assigned.
-        // AND strictly for the current user ID to avoid ghost leads
+        // FIX: Strictly filter for leads in "Prospecção" status AND for the current user
         const prospectingLeads = allClients.filter(c =>
-            (c.prospectingDay || c.status === 'Prospecção') &&
+            c.status === 'Prospecção' &&
             (c.ownerId && user.id && String(c.ownerId) === String(user.id))
         );
         setLeads(prospectingLeads);
+
+        // AUTO-CLEANUP: If there are leads with prospectingDay but WRONG status, clear the field in BG
+        const orphanedLeads = allClients.filter(c => c.prospectingDay && c.status !== 'Prospecção');
+        if (orphanedLeads.length > 0) {
+            console.log(`🧹 Limpando ${orphanedLeads.length} leads fantasmas...`);
+            orphanedLeads.forEach(async (ol) => {
+                await db.update('clients', ol.id, { prospectingDay: null });
+            });
+        }
     };
 
     useEffect(() => {
@@ -52,9 +58,15 @@ const Prospecting = () => {
         e.preventDefault();
 
         // Check Limit
-        const textLeadsOnDay = leads.filter(l => l.prospectingDay === day).length;
+        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+        const textLeadsOnDay = leads.filter(l => 
+            l.prospectingDay === day && 
+            String(l.ownerId) === String(user.id) &&
+            l.status === 'Prospecção'
+        ).length;
+
         if (textLeadsOnDay >= 30) {
-            alert(`O dia ${day} já atingiu o limite de 30 leads.`);
+            alert(`Sua agenda para ${day} já atingiu o limite de 30 leads.`);
             setDraggedLead(null);
             return;
         }
