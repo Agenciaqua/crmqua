@@ -143,15 +143,18 @@ export default function Meetings() {
     const [initialModalDate, setInitialModalDate] = useState(null);
 
     const [clients, setClients] = useState([]);
+    const [allClientsLookup, setAllClientsLookup] = useState([]);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
         refreshData();
     }, []);
 
     const refreshData = async () => {
-        const [allMeetings, allClients] = await Promise.all([
+        const [allMeetings, allClients, allUsersList] = await Promise.all([
             db.getAll('meetings'),
-            db.getAll('clients')
+            db.getAll('clients'),
+            db.getAll('users')
         ]);
         const user = JSON.parse(localStorage.getItem('qua_user_session')) || {};
 
@@ -171,6 +174,8 @@ export default function Meetings() {
             return (da + a.time).localeCompare(db + b.time);
         }));
         setClients(userClients);
+        setAllClientsLookup(allClients);
+        setUsers(allUsersList);
     };
 
     const handleSaveMeeting = async (meeting) => {
@@ -217,8 +222,13 @@ export default function Meetings() {
     };
 
     const getClientName = (id) => {
-        const c = clients.find(client => client.id === id);
+        const c = allClientsLookup.find(client => client.id === id);
         return c ? c.name : 'N/A';
+    };
+
+    const getUserName = (id) => {
+        const u = users.find(user => user.id === id);
+        return u ? u.name : 'N/A';
     };
 
     const getTypeIcon = (type) => {
@@ -311,9 +321,12 @@ export default function Meetings() {
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ display: 'flex', gap: '20px', color: '#888', fontSize: '0.9rem' }}>
+                                    <div style={{ display: 'flex', gap: '20px', color: '#888', fontSize: '0.9rem', flexWrap: 'wrap' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {getClientName(m.clientId)}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {m.time} ({m.duration})</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-orange)', fontWeight: '500' }}>
+                                            <User size={14} /> Responsável: {getUserName(m.assigneeId)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

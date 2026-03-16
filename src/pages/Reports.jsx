@@ -93,11 +93,12 @@ export default function Reports() {
         // Ideally reports usually track "Who performed the meeting", so assigneeId is priority.
         const checkMeetingOwner = (m) => {
             if (!selectedUser) return true;
-            return String(m.assigneeId) === String(selectedUser) || String(m.ownerId) === String(selectedUser);
+            return (m.assigneeId && String(m.assigneeId) === String(selectedUser)) || 
+                   (m.ownerId && String(m.ownerId) === String(selectedUser));
         };
         const meetingsInRange = rawData.meetings.filter(m => isWithinRange(m.date) && checkMeetingOwner(m));
         const doneStatuses = ['Realizada', 'Fechou', 'Não Fechou'];
-        const meetingsDone = meetingsInRange.filter(m => doneStatuses.includes(m.status)).length;
+        const meetingsDone = meetingsInRange.filter(m => m.status && doneStatuses.includes(m.status)).length;
         const meetingsClosed = meetingsInRange.filter(m => m.status === 'Fechou').length;
 
         // Clients (ownerId)

@@ -14,7 +14,8 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
         duration: '60 min',
         type: 'Reunião Presencial',
         notes: '',
-        status: 'scheduled'
+        status: 'scheduled',
+        assigneeId: user?.id || ''
     });
 
     const [clients, setClients] = useState([]);
@@ -32,7 +33,10 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
         loadData();
 
         if (initialData) {
-            setMeeting(initialData);
+            setMeeting({
+                ...initialData,
+                assigneeId: initialData.assigneeId || user?.id || ''
+            });
         }
     }, [initialData]);
 
