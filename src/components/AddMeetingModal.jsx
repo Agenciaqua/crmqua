@@ -27,7 +27,14 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
                 db.getAll('clients'),
                 db.getAll('users')
             ]);
-            setClients(allClients);
+            
+            // Privacy fix: Only show clients owned by this user
+            const myClients = allClients.filter(c => 
+                String(c.ownerId) === String(user?.id) || 
+                c.status === 'Fechado'
+            );
+            
+            setClients(myClients);
             setUsers(allUsers);
         };
         loadData();

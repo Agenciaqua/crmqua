@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -53,11 +52,6 @@ export default function Login() {
             }
         } else {
             if (await login(email, password)) {
-                // Check if user has role, if not -> onboarding
-                // But login function in AuthContext doesn't return user obj directly to check here
-                // We will handle redirect logic in App.jsx or AuthContext mostly
-                // For now assuming existing users go to dashboard
-                // We will fix redirect logic next step
                 navigate('/dashboard');
             } else {
                 setError('Email ou senha inválidos.');
@@ -147,8 +141,6 @@ export default function Login() {
                             textDecoration: 'none',
                             fontWeight: '500'
                         }}
-                        onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.15)'}
-                        onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.08)'}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24">
                             <path
@@ -173,7 +165,7 @@ export default function Login() {
                 </div>
 
                 <div style={{ marginTop: '40px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', width: '100%' }}>
-                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF69B4', fontWeight: 'bold', border: '1px solid #FF69B4', padding: '5px', borderRadius: '5px' }}>v0.4.23</p>
+                    <p style={{ marginTop: '10px', fontSize: '1rem', color: '#FF69B4', fontWeight: 'bold', border: '1px solid #FF69B4', padding: '5px', borderRadius: '5px' }}>v0.4.24</p>
                 </div>
             </div>
         </div>

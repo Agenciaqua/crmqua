@@ -222,12 +222,14 @@ export default function Meetings() {
     };
 
     const getClientName = (id) => {
-        const c = allClientsLookup.find(client => client.id === id);
+        if (!id) return 'N/A';
+        const c = allClientsLookup.find(client => String(client.id) === String(id));
         return c ? c.name : 'N/A';
     };
 
     const getUserName = (id) => {
-        const u = users.find(user => user.id === id);
+        if (!id) return 'N/A';
+        const u = users.find(user => String(user.id) === String(id));
         return u ? u.name : 'N/A';
     };
 
@@ -322,7 +324,7 @@ export default function Meetings() {
                                         )}
                                     </div>
                                     <div style={{ display: 'flex', gap: '20px', color: '#888', fontSize: '0.9rem', flexWrap: 'wrap' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {getClientName(m.clientId)}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> Cliente: {getClientName(m.clientId)}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} /> {m.time} ({m.duration})</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-orange)', fontWeight: '500' }}>
                                             <User size={14} /> Responsável: {getUserName(m.assigneeId)}
