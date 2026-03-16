@@ -18,7 +18,7 @@ export default function Clients() {
 
     const refreshClients = async () => {
         const allClients = await db.getAll('clients');
-        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+        const user = JSON.parse(localStorage.getItem('qua_user_session')) || {};
 
         // Filter clients for the current user only, but allow Closed clients to remain visible
         const userClients = allClients.filter(c =>

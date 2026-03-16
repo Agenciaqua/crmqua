@@ -46,6 +46,7 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
             onClose();
         } catch (error) {
             console.error("Erro no modal ao salvar:", error);
+            alert("ERRO AO SALVAR REUNIÃO: " + error.message);
         }
     };
 

@@ -118,21 +118,28 @@ export const db = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(cleanUpdates)
             });
-            if (!res.ok) throw new Error("Update failed");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Update failed");
+            }
             const rawData = await res.json();
             return normalizeResponse(table, rawData);
         } catch (e) {
             console.error("DB Update Error:", e);
-            return null;
+            throw e;
         }
     },
     delete: async (table, id) => {
         try {
-            await fetch(`${API_URL}?type=${table}&id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}?type=${table}&id=${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Delete failed");
+            }
             return true;
         } catch (e) {
             console.error("DB Delete Error:", e);
-            return false;
+            throw e;
         }
     },
     authenticate: async (email, password) => {

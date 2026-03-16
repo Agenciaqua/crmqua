@@ -153,7 +153,7 @@ export default function Meetings() {
             db.getAll('meetings'),
             db.getAll('clients')
         ]);
-        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+        const user = JSON.parse(localStorage.getItem('qua_user_session')) || {};
 
         const userMeetings = allMeetings.filter(m =>
             (m.assigneeId && user.id && String(m.assigneeId) === String(user.id)) ||

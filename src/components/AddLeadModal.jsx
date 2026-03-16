@@ -82,7 +82,7 @@ const AddLeadModal = ({ onClose, onSave, initialData }) => {
             onClose();
         } catch (error) {
             console.error("Erro ao salvar lead:", error);
-            alert("Erro ao salvar lead. Verifique os dados e tente novamente.\n" + error.message);
+            alert("ERRO CRÍTICO AO SALVAR LEAD: " + error.message + "\n\nPor favor, envie este erro para o suporte.");
         }
     };
 

@@ -17,7 +17,7 @@ const Prospecting = () => {
 
     const refreshData = async () => {
         const allClients = await db.getAll('clients');
-        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+        const user = JSON.parse(localStorage.getItem('qua_user_session')) || {};
 
         // FIX: Strictly filter for leads in "Prospecção" status AND for the current user
         const prospectingLeads = allClients.filter(c =>
@@ -58,7 +58,7 @@ const Prospecting = () => {
         e.preventDefault();
 
         // Check Limit
-        const user = JSON.parse(localStorage.getItem('crm_user')) || {};
+        const user = JSON.parse(localStorage.getItem('qua_user_session')) || {};
         const textLeadsOnDay = leads.filter(l => 
             l.prospectingDay === day && 
             String(l.ownerId) === String(user.id) &&
