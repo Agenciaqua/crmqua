@@ -174,14 +174,19 @@ export default function Meetings() {
     };
 
     const handleSaveMeeting = async (meeting) => {
-        if (meeting.id) {
-            await db.update('meetings', meeting.id, meeting);
-        } else {
-            await db.add('meetings', meeting);
+        try {
+            if (meeting.id) {
+                await db.update('meetings', meeting.id, meeting);
+            } else {
+                await db.add('meetings', meeting);
+            }
+            refreshData();
+            setEditingMeeting(null);
+            setInitialModalDate(null);
+        } catch (error) {
+            console.error("Erro ao salvar reunião:", error);
+            alert("Erro fatal ao salvar a reunião no banco de dados. " + error.message);
         }
-        refreshData();
-        setEditingMeeting(null);
-        setInitialModalDate(null);
     };
 
     const handleDelete = async (id) => {

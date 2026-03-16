@@ -36,13 +36,17 @@ const AddMeetingModal = ({ onClose, onSave, initialData }) => {
         }
     }, [initialData]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave({
-            ...meeting,
-            ownerId: initialData?.ownerId || user?.id
-        });
-        onClose();
+        try {
+            await onSave({
+                ...meeting,
+                ownerId: initialData?.ownerId || user?.id
+            });
+            onClose();
+        } catch (error) {
+            console.error("Erro no modal ao salvar:", error);
+        }
     };
 
     return (

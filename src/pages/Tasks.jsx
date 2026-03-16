@@ -118,13 +118,8 @@ export default function Tasks() {
         try {
             const allTasks = await db.getAll('tasks');
             if (Array.isArray(allTasks)) {
-                // Permission Logic: Manager sees all, others see only assigned/owned
-                const isManager = ['gestor', 'manager', 'admin'].includes(user.role?.toLowerCase());
-
-                const visibleTasks = isManager
-                    ? allTasks
-                    : allTasks.filter(t => t.assigneeId === user.id || t.ownerId === user.id);
-
+                // EXPLICIT REQUIREMENT: User only sees tasks assigned to them or created by them.
+                const visibleTasks = allTasks.filter(t => t.assigneeId === user.id || t.ownerId === user.id);
                 setTasks(visibleTasks);
             }
         } catch (error) {
